@@ -40,6 +40,58 @@ export interface AuthResponse {
   expiresIn: number;
 }
 
+// User Roles
+export enum UserRole {
+  ADMIN = 'admin',
+  MANAGER = 'manager',
+  CASHIER = 'cashier',
+  KITCHEN_STAFF = 'kitchen_staff',
+  WAITER = 'waiter',
+  WAITRESS = 'waitress',
+  INVENTORY_MANAGER = 'inventory_manager',
+}
+
+// Permissions
+export enum Permission {
+  // POS Permissions
+  POS_ACCESS = 'pos.access',
+  POS_VOID_TRANSACTION = 'pos.void_transaction',
+  POS_APPLY_DISCOUNT = 'pos.apply_discount',
+  POS_REFUND = 'pos.refund',
+  POS_VIEW_REPORTS = 'pos.view_reports',
+
+  // Product Permissions
+  PRODUCT_VIEW = 'product.view',
+  PRODUCT_CREATE = 'product.create',
+  PRODUCT_UPDATE = 'product.update',
+  PRODUCT_DELETE = 'product.delete',
+
+  // Inventory Permissions
+  INVENTORY_VIEW = 'inventory.view',
+  INVENTORY_MANAGE = 'inventory.manage',
+  INVENTORY_ADJUST = 'inventory.adjust',
+
+  // Customer Permissions
+  CUSTOMER_VIEW = 'customer.view',
+  CUSTOMER_CREATE = 'customer.create',
+  CUSTOMER_UPDATE = 'customer.update',
+  CUSTOMER_DELETE = 'customer.delete',
+
+  // User Management
+  USER_VIEW = 'user.view',
+  USER_CREATE = 'user.create',
+  USER_UPDATE = 'user.update',
+  USER_DELETE = 'user.delete',
+
+  // Settings
+  SETTINGS_VIEW = 'settings.view',
+  SETTINGS_MANAGE = 'settings.manage',
+
+  // Reports
+  REPORTS_VIEW = 'reports.view',
+  REPORTS_EXPORT = 'reports.export',
+}
+
 export interface User {
   id: string;
   email: string;
@@ -47,13 +99,15 @@ export interface User {
   name: string;
   firstName?: string;
   lastName?: string;
-  role: string;
-  roles?: string[];
+  role: UserRole;
+  roles?: UserRole[];
   avatar?: string;
   phone?: string;
   branchId?: string;
-  permissions?: string[];
-  status?: string;
+  permissions?: Permission[];
+  status?: 'active' | 'inactive' | 'suspended';
+  pinEnabled?: boolean;
+  biometricEnabled?: boolean;
   createdAt?: string;
   lastLogin?: string;
 }
@@ -63,6 +117,60 @@ export interface TokenData {
   accessToken: string;
   refreshToken: string;
   expiresIn: number;
+}
+
+export interface DecodedToken {
+  userId: string;
+  email: string;
+  role: UserRole;
+  roles?: UserRole[];
+  permissions?: Permission[];
+  iat: number;
+  exp: number;
+}
+
+// Session Types
+export interface Session {
+  user: User;
+  token: string;
+  refreshToken: string;
+  expiresAt: Date;
+  lastActivity: Date;
+  rememberMe: boolean;
+}
+
+// PIN Types
+export interface PinSetupRequest {
+  userId: string;
+  newPIN: string;
+}
+
+export interface PinDisableRequest {
+  userId: string;
+}
+
+export interface PinResetAttemptsRequest {
+  userId: string;
+}
+
+export interface PinData {
+  hash: string;
+  attempts: number;
+  maxAttempts: number;
+  lockedUntil?: Date;
+}
+
+// Biometric Types
+export interface BiometricAuthResult {
+  success: boolean;
+  error?: string;
+  biometryType?: 'FaceID' | 'TouchID' | 'Fingerprint' | 'Iris';
+}
+
+export interface BiometricSettings {
+  enabled: boolean;
+  biometryType?: string;
+  fallbackToPin: boolean;
 }
 
 // Pagination

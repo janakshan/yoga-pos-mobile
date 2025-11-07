@@ -14,8 +14,10 @@ export type RootStackParamList = {
 // Auth Stack Navigator
 export type AuthStackParamList = {
   Login: undefined;
-  PinLogin: undefined;
+  PinLogin: {username?: string};
+  PinSetup: undefined;
   ForgotPassword: undefined;
+  Unauthorized: {message?: string};
 };
 
 // Main Tab Navigator

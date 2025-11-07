@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   StyleSheet,
@@ -8,21 +8,40 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {AuthStackParamList} from '@navigation/types';
 import {useAuthStore} from '@store/slices/authSlice';
 import {useTheme} from '@hooks/useTheme';
 import {Typography, Button, Input} from '@components/ui';
-import {Column, Spacer} from '@components/layout';
+import {Column, Spacer, Row} from '@components/layout';
 
 /**
  * Login Screen
- * Email/Password authentication with new design system
+ * Email/Password authentication with biometric support
  */
+
+type NavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 
 export const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const {login, isLoading, error} = useAuthStore();
+  const [rememberMe, setRememberMe] = useState(true);
+  const {
+    login,
+    loginWithBiometric,
+    isLoading,
+    error,
+    biometricAvailable,
+    biometricEnabled,
+    checkBiometricAvailability,
+  } = useAuthStore();
   const {theme} = useTheme();
+  const navigation = useNavigation<NavigationProp>();
+
+  useEffect(() => {
+    checkBiometricAvailability();
+  }, []);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -31,9 +50,17 @@ export const LoginScreen = () => {
     }
 
     try {
-      await login({email, password, rememberMe: true});
+      await login({email, password, rememberMe});
     } catch (err: any) {
       Alert.alert('Login Failed', err.message || 'Invalid credentials');
+    }
+  };
+
+  const handleBiometricLogin = async () => {
+    try {
+      await loginWithBiometric();
+    } catch (err: any) {
+      Alert.alert('Biometric Login Failed', err.message || 'Please try again');
     }
   };
 
@@ -93,6 +120,43 @@ export const LoginScreen = () => {
 
           <Spacer size="lg" />
 
+          <Row justifyContent="space-between" alignItems="center">
+            <TouchableOpacity
+              style={styles.checkboxContainer}
+              onPress={() => setRememberMe(!rememberMe)}
+              disabled={isLoading}>
+              <View
+                style={[
+                  styles.checkbox,
+                  {
+                    borderColor: theme.colors.border,
+                    backgroundColor: rememberMe
+                      ? theme.colors.primary[500]
+                      : 'transparent',
+                  },
+                ]}>
+                {rememberMe && (
+                  <Typography variant="bodySmall" color="#fff">
+                    ✓
+                  </Typography>
+                )}
+              </View>
+              <Typography variant="bodySmall" color={theme.colors.text.secondary}>
+                Remember me
+              </Typography>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              disabled={isLoading}
+              onPress={() => Alert.alert('Info', 'Forgot password coming soon')}>
+              <Typography variant="bodySmall" color={theme.colors.primary[500]}>
+                Forgot Password?
+              </Typography>
+            </TouchableOpacity>
+          </Row>
+
+          <Spacer size="lg" />
+
           <Button
             variant="primary"
             size="lg"
@@ -103,14 +167,29 @@ export const LoginScreen = () => {
             Sign In
           </Button>
 
+          {biometricAvailable && biometricEnabled && (
+            <>
+              <Spacer size="md" />
+              <Button
+                variant="secondary"
+                size="lg"
+                fullWidth
+                onPress={handleBiometricLogin}
+                loading={isLoading}
+                disabled={isLoading}>
+                Sign In with Biometric
+              </Button>
+            </>
+          )}
+
           <Spacer size="md" />
 
           <TouchableOpacity
             style={styles.linkButton}
             disabled={isLoading}
-            onPress={() => Alert.alert('Info', 'Forgot password coming soon')}>
+            onPress={() => navigation.navigate('PinLogin', {})}>
             <Typography variant="bodySmall" color={theme.colors.primary[500]}>
-              Forgot Password?
+              Use PIN Login
             </Typography>
           </TouchableOpacity>
         </View>
@@ -136,6 +215,19 @@ const styles = StyleSheet.create({
   },
   form: {
     width: '100%',
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   linkButton: {
     alignItems: 'center',

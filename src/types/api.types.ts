@@ -1,0 +1,288 @@
+/**
+ * API Types
+ * Type definitions for API requests and responses
+ */
+
+// Base API Response
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  code?: string;
+  details?: any;
+}
+
+// Error Response
+export interface ApiError {
+  success: false;
+  message: string;
+  code: string;
+  details?: any;
+}
+
+// Auth Types
+export interface LoginRequest {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
+export interface PinLoginRequest {
+  username: string;
+  pin: string;
+  rememberMe?: boolean;
+}
+
+export interface AuthResponse {
+  user: User;
+  token: string;
+  refreshToken: string;
+  expiresIn: number;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  username: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  role: string;
+  roles?: string[];
+  avatar?: string;
+  phone?: string;
+  branchId?: string;
+  permissions?: string[];
+  status?: string;
+  createdAt?: string;
+  lastLogin?: string;
+}
+
+// Token Types
+export interface TokenData {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+}
+
+// Pagination
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+// Branch Types
+export interface Branch {
+  id: string;
+  name: string;
+  code: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  phone: string;
+  email: string;
+  managerId?: string;
+  managerName?: string;
+  isActive: boolean;
+  staffCount?: number;
+  monthlyRevenue?: number;
+  transactionCount?: number;
+  settings?: BranchSettings;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BranchSettings {
+  timezone: string;
+  currency: string;
+  taxRate: number;
+  operatingHours?: Record<string, {open: string; close: string}>;
+}
+
+// Product Types
+export interface Product {
+  id: string;
+  sku: string;
+  name: string;
+  description?: string;
+  category: string;
+  subcategory?: string;
+  price: number;
+  pricing?: {
+    retail: number;
+    wholesale?: number;
+    member?: number;
+  };
+  cost: number;
+  stockQuantity: number;
+  lowStockThreshold?: number;
+  unit: string;
+  barcode?: string;
+  imageUrl?: string;
+  imageUrls?: string[];
+  status: 'active' | 'inactive' | 'discontinued';
+  tags?: string[];
+  trackInventory: boolean;
+  allowBackorder?: boolean;
+  taxRate?: number;
+  supplierId?: string;
+  supplier?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Customer Types
+export interface Customer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  alternatePhone?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  address?: Address;
+  customerType: 'vip' | 'regular' | 'corporate';
+  status: 'active' | 'inactive' | 'blocked';
+  loyaltyInfo?: LoyaltyInfo;
+  creditInfo?: CreditInfo;
+  storeCredit?: StoreCredit;
+  stats?: CustomerStats;
+  tags?: string[];
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Address {
+  street: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+}
+
+export interface LoyaltyInfo {
+  points: number;
+  tier: 'bronze' | 'silver' | 'gold' | 'platinum';
+  joinedDate: string;
+  lastEarnedDate?: string;
+  lifetimePoints: number;
+}
+
+export interface CreditInfo {
+  creditLimit: number;
+  currentBalance: number;
+  availableCredit: number;
+  creditStatus: 'good' | 'warning' | 'suspended';
+}
+
+export interface StoreCredit {
+  balance: number;
+  expiryDate?: string;
+}
+
+export interface CustomerStats {
+  totalPurchases: number;
+  totalSpent: number;
+  lastPurchaseDate?: string;
+  averageOrderValue: number;
+}
+
+// POS Transaction Types
+export interface POSTransaction {
+  id?: string;
+  customerId?: string;
+  branchId: string;
+  items: POSItem[];
+  subtotal: number;
+  discountTotal: number;
+  taxTotal: number;
+  total: number;
+  payments: POSPayment[];
+  loyaltyPointsEarned?: number;
+  notes?: string;
+  status?: 'pending' | 'completed' | 'refunded' | 'cancelled';
+  timestamp?: string;
+}
+
+export interface POSItem {
+  productId: string;
+  productName?: string;
+  quantity: number;
+  price: number;
+  discount?: number;
+  tax?: number;
+  total?: number;
+}
+
+export interface POSPayment {
+  method: 'card' | 'cash' | 'mobile_payment' | 'bank_transfer' | 'store_credit';
+  amount: number;
+  reference?: string;
+}
+
+// Settings Types
+export interface AppSettings {
+  general: GeneralSettings;
+  branding?: BrandingSettings;
+  hardware?: HardwareSettings;
+  notifications?: NotificationSettings;
+  backup?: BackupSettings;
+}
+
+export interface GeneralSettings {
+  businessName: string;
+  timezone: string;
+  currency: string;
+  language: string;
+  dateFormat?: string;
+  timeFormat?: '12h' | '24h';
+}
+
+export interface BrandingSettings {
+  logo?: string;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor?: string;
+}
+
+export interface HardwareSettings {
+  printer?: {
+    enabled: boolean;
+    type: string;
+    connection: string;
+  };
+  scanner?: {
+    enabled: boolean;
+    type: string;
+  };
+}
+
+export interface NotificationSettings {
+  lowStockAlerts: boolean;
+  orderNotifications: boolean;
+  emailNotifications?: boolean;
+  smsNotifications?: boolean;
+  pushNotifications?: boolean;
+}
+
+export interface BackupSettings {
+  autoBackup: boolean;
+  frequency: 'hourly' | 'daily' | 'weekly' | 'monthly';
+  cloudProvider?: 'google_drive' | 'dropbox' | 's3';
+}

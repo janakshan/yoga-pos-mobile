@@ -3,7 +3,7 @@ import {StatusBar} from 'react-native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {RootNavigator} from '@navigation/RootNavigator';
-import {Theme} from '@constants/theme';
+import {ThemeProvider} from '@context/ThemeContext';
 
 /**
  * Main App Component
@@ -24,13 +24,12 @@ const queryClient = new QueryClient({
 const App = () => {
   return (
     <GestureHandlerRootView style={{flex: 1}}>
-      <QueryClientProvider client={queryClient}>
-        <StatusBar
-          barStyle="dark-content"
-          backgroundColor={Theme.colors.white}
-        />
-        <RootNavigator />
-      </QueryClientProvider>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <StatusBar barStyle="dark-content" />
+          <RootNavigator />
+        </QueryClientProvider>
+      </ThemeProvider>
     </GestureHandlerRootView>
   );
 };

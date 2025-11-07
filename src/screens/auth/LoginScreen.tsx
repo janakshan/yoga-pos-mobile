@@ -1,28 +1,28 @@
 import React, {useState} from 'react';
 import {
   View,
-  Text,
-  TextInput,
-  TouchableOpacity,
   StyleSheet,
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import {useAuthStore} from '@store/slices/authSlice';
-import {Theme} from '@constants/theme';
+import {useTheme} from '@hooks/useTheme';
+import {Typography, Button, Input} from '@components/ui';
+import {Column, Spacer} from '@components/layout';
 
 /**
  * Login Screen
- * Email/Password authentication
+ * Email/Password authentication with new design system
  */
 
 export const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const {login, isLoading, error} = useAuthStore();
+  const {theme} = useTheme();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -38,61 +38,87 @@ export const LoginScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {backgroundColor: theme.colors.background.primary},
+      ]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Yoga POS</Text>
-          <Text style={styles.subtitle}>Point of Sale System</Text>
-        </View>
+        <Column alignItems="center">
+          <Typography variant="h2" color={theme.colors.primary[500]}>
+            Yoga POS
+          </Typography>
+          <Spacer size="xs" />
+          <Typography variant="body" color={theme.colors.text.secondary}>
+            Point of Sale System
+          </Typography>
+        </Column>
+
+        <Spacer size="3xl" />
 
         <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your email"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              editable={!isLoading}
-            />
-          </View>
+          <Input
+            label="Email"
+            placeholder="Enter your email"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            disabled={isLoading}
+            required
+          />
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              editable={!isLoading}
-            />
-          </View>
+          <Spacer size="md" />
 
-          {error && <Text style={styles.errorText}>{error}</Text>}
+          <Input
+            label="Password"
+            placeholder="Enter your password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            disabled={isLoading}
+            required
+          />
+
+          {error && (
+            <>
+              <Spacer size="sm" />
+              <Typography variant="caption" color={theme.colors.error}>
+                {error}
+              </Typography>
+            </>
+          )}
+
+          <Spacer size="lg" />
+
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            onPress={handleLogin}
+            loading={isLoading}
+            disabled={isLoading}>
+            Sign In
+          </Button>
+
+          <Spacer size="md" />
 
           <TouchableOpacity
-            style={[styles.button, isLoading && styles.buttonDisabled]}
-            onPress={handleLogin}
-            disabled={isLoading}>
-            {isLoading ? (
-              <ActivityIndicator color={Theme.colors.white} />
-            ) : (
-              <Text style={styles.buttonText}>Sign In</Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.linkButton} disabled={isLoading}>
-            <Text style={styles.linkText}>Forgot Password?</Text>
+            style={styles.linkButton}
+            disabled={isLoading}
+            onPress={() => Alert.alert('Info', 'Forgot password coming soon')}>
+            <Typography variant="bodySmall" color={theme.colors.primary[500]}>
+              Forgot Password?
+            </Typography>
           </TouchableOpacity>
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>v1.0.0</Text>
+          <Typography variant="caption" color={theme.colors.text.tertiary}>
+            v1.0.0
+          </Typography>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -102,83 +128,20 @@ export const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Theme.colors.background.primary,
   },
   content: {
     flex: 1,
-    paddingHorizontal: Theme.spacing.lg,
+    paddingHorizontal: 24,
     justifyContent: 'center',
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: Theme.spacing['3xl'],
-  },
-  title: {
-    fontSize: Theme.typography.fontSize['3xl'],
-    fontWeight: 'bold',
-    color: Theme.colors.primary[500],
-    marginBottom: Theme.spacing.sm,
-  },
-  subtitle: {
-    fontSize: Theme.typography.fontSize.base,
-    color: Theme.colors.text.secondary,
   },
   form: {
     width: '100%',
   },
-  inputContainer: {
-    marginBottom: Theme.spacing.md,
-  },
-  label: {
-    fontSize: Theme.typography.fontSize.sm,
-    fontWeight: '600',
-    color: Theme.colors.text.primary,
-    marginBottom: Theme.spacing.xs,
-  },
-  input: {
-    height: Theme.input.height,
-    borderWidth: Theme.input.borderWidth,
-    borderColor: Theme.colors.border.light,
-    borderRadius: Theme.borderRadius.base,
-    paddingHorizontal: Theme.input.paddingHorizontal,
-    fontSize: Theme.typography.fontSize.base,
-    backgroundColor: Theme.colors.white,
-  },
-  button: {
-    height: Theme.button.height.lg,
-    backgroundColor: Theme.colors.primary[500],
-    borderRadius: Theme.borderRadius.base,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: Theme.spacing.lg,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: Theme.colors.white,
-    fontSize: Theme.typography.fontSize.base,
-    fontWeight: '600',
-  },
   linkButton: {
-    marginTop: Theme.spacing.md,
     alignItems: 'center',
-  },
-  linkText: {
-    color: Theme.colors.primary[500],
-    fontSize: Theme.typography.fontSize.sm,
-  },
-  errorText: {
-    color: Theme.colors.error,
-    fontSize: Theme.typography.fontSize.sm,
-    marginTop: Theme.spacing.xs,
   },
   footer: {
     alignItems: 'center',
-    marginTop: Theme.spacing.xl,
-  },
-  footerText: {
-    color: Theme.colors.text.tertiary,
-    fontSize: Theme.typography.fontSize.xs,
+    marginTop: 32,
   },
 });

@@ -1,73 +1,149 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import {View, StyleSheet, SafeAreaView, ScrollView} from 'react-native';
 import {useAuthStore} from '@store/slices/authSlice';
-import {Theme} from '@constants/theme';
+import {useTheme} from '@hooks/useTheme';
+import {Typography, Button, Card} from '@components/ui';
+import {Row, Column, Spacer} from '@components/layout';
 
 /**
  * Dashboard Screen
- * Main dashboard with overview and quick actions
+ * Main dashboard with overview and quick actions - using new design system
  */
 
 export const DashboardScreen = () => {
   const {user, logout} = useAuthStore();
+  const {theme, toggleTheme, isDark} = useTheme();
 
   const handleLogout = async () => {
     await logout();
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {backgroundColor: theme.colors.background.secondary},
+      ]}>
       <ScrollView style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Dashboard</Text>
-          <Text style={styles.welcome}>Welcome, {user?.name}!</Text>
+        <View
+          style={[
+            styles.header,
+            {
+              backgroundColor: theme.colors.background.primary,
+              borderBottomColor: theme.colors.border.light,
+            },
+          ]}>
+          <Typography variant="h3" color={theme.colors.text.primary}>
+            Dashboard
+          </Typography>
+          <Spacer size="xs" />
+          <Typography variant="body" color={theme.colors.text.secondary}>
+            Welcome, {user?.name}!
+          </Typography>
         </View>
 
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>$12,500</Text>
-            <Text style={styles.statLabel}>Today's Sales</Text>
-          </View>
+        <Spacer size="md" />
 
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>85</Text>
-            <Text style={styles.statLabel}>Transactions</Text>
-          </View>
+        <Row
+          wrap
+          gap="md"
+          style={styles.statsContainer}
+          justifyContent="space-between">
+          <Card variant="elevated" padding="md" style={styles.statCard}>
+            <Typography variant="h3" color={theme.colors.primary[500]}>
+              $12,500
+            </Typography>
+            <Spacer size="xs" />
+            <Typography variant="bodySmall" color={theme.colors.text.secondary}>
+              Today's Sales
+            </Typography>
+          </Card>
 
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>45</Text>
-            <Text style={styles.statLabel}>Customers</Text>
-          </View>
+          <Card variant="elevated" padding="md" style={styles.statCard}>
+            <Typography variant="h3" color={theme.colors.primary[500]}>
+              85
+            </Typography>
+            <Spacer size="xs" />
+            <Typography variant="bodySmall" color={theme.colors.text.secondary}>
+              Transactions
+            </Typography>
+          </Card>
 
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>12</Text>
-            <Text style={styles.statLabel}>Low Stock</Text>
-          </View>
-        </View>
+          <Card variant="elevated" padding="md" style={styles.statCard}>
+            <Typography variant="h3" color={theme.colors.primary[500]}>
+              45
+            </Typography>
+            <Spacer size="xs" />
+            <Typography variant="bodySmall" color={theme.colors.text.secondary}>
+              Customers
+            </Typography>
+          </Card>
+
+          <Card variant="elevated" padding="md" style={styles.statCard}>
+            <Typography variant="h3" color={theme.colors.warning}>
+              12
+            </Typography>
+            <Spacer size="xs" />
+            <Typography variant="bodySmall" color={theme.colors.text.secondary}>
+              Low Stock
+            </Typography>
+          </Card>
+        </Row>
+
+        <Spacer size="lg" />
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>New Sale</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>Add Product</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>Add Customer</Text>
-          </TouchableOpacity>
+          <Typography variant="h5" color={theme.colors.text.primary}>
+            Quick Actions
+          </Typography>
+          <Spacer size="md" />
+
+          <Column gap="sm">
+            <Card variant="outlined" padding="md" onPress={() => {}}>
+              <Typography variant="body" color={theme.colors.text.primary}>
+                New Sale
+              </Typography>
+            </Card>
+
+            <Card variant="outlined" padding="md" onPress={() => {}}>
+              <Typography variant="body" color={theme.colors.text.primary}>
+                Add Product
+              </Typography>
+            </Card>
+
+            <Card variant="outlined" padding="md" onPress={() => {}}>
+              <Typography variant="body" color={theme.colors.text.primary}>
+                Add Customer
+              </Typography>
+            </Card>
+          </Column>
         </View>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity>
+        <Spacer size="lg" />
+
+        <View style={styles.themeSection}>
+          <Button
+            variant="outline"
+            size="md"
+            fullWidth
+            onPress={toggleTheme}>
+            {isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          </Button>
+        </View>
+
+        <Spacer size="md" />
+
+        <View style={styles.logoutSection}>
+          <Button
+            variant="danger"
+            size="md"
+            fullWidth
+            onPress={handleLogout}>
+            Logout
+          </Button>
+        </View>
+
+        <Spacer size="lg" />
       </ScrollView>
     </SafeAreaView>
   );
@@ -76,82 +152,28 @@ export const DashboardScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Theme.colors.background.secondary,
   },
   content: {
     flex: 1,
   },
   header: {
-    padding: Theme.spacing.lg,
-    backgroundColor: Theme.colors.white,
+    padding: 24,
     borderBottomWidth: 1,
-    borderBottomColor: Theme.colors.border.light,
-  },
-  title: {
-    fontSize: Theme.typography.fontSize['2xl'],
-    fontWeight: 'bold',
-    color: Theme.colors.text.primary,
-    marginBottom: Theme.spacing.xs,
-  },
-  welcome: {
-    fontSize: Theme.typography.fontSize.base,
-    color: Theme.colors.text.secondary,
   },
   statsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    padding: Theme.spacing.md,
-    gap: Theme.spacing.md,
+    paddingHorizontal: 16,
   },
   statCard: {
     flex: 1,
     minWidth: '45%',
-    backgroundColor: Theme.colors.white,
-    padding: Theme.spacing.lg,
-    borderRadius: Theme.borderRadius.md,
-    ...Theme.shadows.sm,
-  },
-  statValue: {
-    fontSize: Theme.typography.fontSize['2xl'],
-    fontWeight: 'bold',
-    color: Theme.colors.primary[500],
-    marginBottom: Theme.spacing.xs,
-  },
-  statLabel: {
-    fontSize: Theme.typography.fontSize.sm,
-    color: Theme.colors.text.secondary,
   },
   section: {
-    padding: Theme.spacing.lg,
+    paddingHorizontal: 24,
   },
-  sectionTitle: {
-    fontSize: Theme.typography.fontSize.lg,
-    fontWeight: '600',
-    color: Theme.colors.text.primary,
-    marginBottom: Theme.spacing.md,
+  themeSection: {
+    paddingHorizontal: 24,
   },
-  actionButton: {
-    backgroundColor: Theme.colors.white,
-    padding: Theme.spacing.md,
-    borderRadius: Theme.borderRadius.base,
-    marginBottom: Theme.spacing.sm,
-    ...Theme.shadows.sm,
-  },
-  actionButtonText: {
-    fontSize: Theme.typography.fontSize.base,
-    color: Theme.colors.text.primary,
-    fontWeight: '500',
-  },
-  logoutButton: {
-    margin: Theme.spacing.lg,
-    padding: Theme.spacing.md,
-    backgroundColor: Theme.colors.error,
-    borderRadius: Theme.borderRadius.base,
-    alignItems: 'center',
-  },
-  logoutButtonText: {
-    color: Theme.colors.white,
-    fontSize: Theme.typography.fontSize.base,
-    fontWeight: '600',
+  logoutSection: {
+    paddingHorizontal: 24,
   },
 });

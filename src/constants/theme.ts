@@ -1,13 +1,12 @@
-import {Colors} from './colors';
+import {ColorScheme, LightColors, DarkColors} from './colors';
 
 /**
  * Theme Configuration
  * Centralized styling constants for the application
  */
 
-export const Theme = {
-  colors: Colors,
-
+// Theme-independent constants
+const themeConstants = {
   // Typography
   typography: {
     fontFamily: {
@@ -30,6 +29,12 @@ export const Theme = {
       tight: 1.25,
       normal: 1.5,
       relaxed: 1.75,
+    },
+    fontWeight: {
+      regular: '400' as const,
+      medium: '500' as const,
+      semiBold: '600' as const,
+      bold: '700' as const,
     },
   },
 
@@ -57,6 +62,13 @@ export const Theme = {
 
   // Shadows
   shadows: {
+    none: {
+      shadowColor: 'transparent',
+      shadowOffset: {width: 0, height: 0},
+      shadowOpacity: 0,
+      shadowRadius: 0,
+      elevation: 0,
+    },
     sm: {
       shadowColor: '#000',
       shadowOffset: {width: 0, height: 1},
@@ -92,6 +104,7 @@ export const Theme = {
     containerPadding: 16,
     screenPadding: 20,
     cardPadding: 16,
+    maxWidth: 1200,
   },
 
   // Button Sizes
@@ -108,6 +121,7 @@ export const Theme = {
       lg: 24,
       xl: 32,
     },
+    borderWidth: 1,
   },
 
   // Input
@@ -124,7 +138,46 @@ export const Theme = {
       normal: 300,
       slow: 500,
     },
+    easing: {
+      linear: 'linear' as const,
+      ease: 'ease' as const,
+      easeIn: 'ease-in' as const,
+      easeOut: 'ease-out' as const,
+      easeInOut: 'ease-in-out' as const,
+    },
+  },
+
+  // Icon Sizes
+  iconSize: {
+    xs: 12,
+    sm: 16,
+    md: 20,
+    lg: 24,
+    xl: 32,
+    '2xl': 40,
+  },
+
+  // Z-Index
+  zIndex: {
+    dropdown: 1000,
+    modal: 1100,
+    popover: 1200,
+    tooltip: 1300,
   },
 } as const;
 
-export type ThemeType = typeof Theme;
+// Create theme with colors
+export const createTheme = (colors: ColorScheme) => ({
+  colors,
+  ...themeConstants,
+});
+
+// Light and Dark themes
+export const LightTheme = createTheme(LightColors);
+export const DarkTheme = createTheme(DarkColors);
+
+// Default theme (light)
+export const Theme = LightTheme;
+
+export type ThemeType = typeof LightTheme;
+export type ThemeMode = 'light' | 'dark';

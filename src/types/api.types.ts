@@ -141,11 +141,15 @@ export interface User {
   avatar?: string;
   phone?: string;
   branchId?: string;
+  branch?: Branch;
   permissions?: Permission[];
   status?: 'active' | 'inactive' | 'suspended';
   pinEnabled?: boolean;
   biometricEnabled?: boolean;
+  employmentInfo?: EmploymentInfo;
+  statistics?: UserStatistics;
   createdAt?: string;
+  updatedAt?: string;
   lastLogin?: string;
 }
 
@@ -208,6 +212,102 @@ export interface BiometricSettings {
   enabled: boolean;
   biometryType?: string;
   fallbackToPin: boolean;
+}
+
+// User Management Types
+export interface EmploymentInfo {
+  employeeId?: string;
+  position?: string;
+  department?: string;
+  hireDate?: string;
+  employmentType?: 'full-time' | 'part-time' | 'contract' | 'temporary';
+  salary?: number;
+  contractEndDate?: string;
+  workSchedule?: string;
+  reportingTo?: string;
+  emergencyContact?: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+}
+
+export interface UserActivityLog {
+  id: string;
+  userId: string;
+  action: string;
+  description: string;
+  metadata?: Record<string, any>;
+  ipAddress?: string;
+  deviceInfo?: string;
+  branchId?: string;
+  timestamp: string;
+}
+
+export interface UserStatistics {
+  totalTransactions: number;
+  totalSales: number;
+  averageTransactionValue: number;
+  lastActivity?: string;
+  loginCount: number;
+  activeHours: number;
+  performanceScore?: number;
+}
+
+export interface CreateUserRequest {
+  email: string;
+  username: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  password: string;
+  role: UserRole;
+  phone?: string;
+  branchId?: string;
+  permissions?: Permission[];
+  avatar?: string;
+  employmentInfo?: EmploymentInfo;
+  status?: 'active' | 'inactive';
+}
+
+export interface UpdateUserRequest {
+  email?: string;
+  username?: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: UserRole;
+  phone?: string;
+  branchId?: string;
+  permissions?: Permission[];
+  avatar?: string;
+  employmentInfo?: EmploymentInfo;
+  status?: 'active' | 'inactive' | 'suspended';
+}
+
+export interface UpdateUserPermissionsRequest {
+  permissions: Permission[];
+}
+
+export interface UpdateUserStatusRequest {
+  status: 'active' | 'inactive' | 'suspended';
+  reason?: string;
+}
+
+export interface ChangeUserPasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ResetUserPasswordRequest {
+  email: string;
+}
+
+export interface UserFilterParams extends PaginationParams {
+  role?: UserRole;
+  branchId?: string;
+  status?: 'active' | 'inactive' | 'suspended';
+  search?: string;
 }
 
 // Pagination

@@ -4,15 +4,13 @@ import {MainTabParamList} from './types';
 import {DashboardScreen} from '@screens/dashboard/DashboardScreen';
 import {POSNavigator} from './POSNavigator';
 import {ProductsNavigator} from './ProductsNavigator';
+import {InventoryNavigator} from './InventoryNavigator';
 import {Theme} from '@constants/theme';
 import {Text} from 'react-native';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 // Placeholder screens for tabs
-const InventoryScreen = () => (
-  <Text style={{padding: 20}}>Inventory Screen - Coming Soon</Text>
-);
 const CustomersScreen = () => (
   <Text style={{padding: 20}}>Customers Screen - Coming Soon</Text>
 );
@@ -69,10 +67,10 @@ export const MainNavigator = () => {
       />
       <Tab.Screen
         name="Inventory"
-        component={InventoryScreen}
+        component={InventoryNavigator}
         options={{
           tabBarLabel: 'Inventory',
-          headerTitle: 'Inventory',
+          headerShown: false,
         }}
       />
       <Tab.Screen

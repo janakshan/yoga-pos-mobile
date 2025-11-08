@@ -45,10 +45,31 @@ export type POSStackParamList = {
 
 // Inventory Stack Navigator
 export type InventoryStackParamList = {
-  InventoryList: undefined;
-  InventoryDetails: {productId: string};
-  InventoryAdjustment: {productId: string};
-  StockTransfer: undefined;
+  InventoryDashboard: undefined;
+  StockLevels: {locationId?: string};
+  StockLevelDetails: {productId: string; locationId: string};
+  StockTransferList: undefined;
+  StockTransferDetails: {transferId: string};
+  StockTransferCreate: undefined;
+  StockTransferReceive: {transferId: string};
+  StockAdjustmentList: undefined;
+  StockAdjustmentDetails: {adjustmentId: string};
+  StockAdjustmentCreate: undefined;
+  CycleCountList: undefined;
+  CycleCountDetails: {cycleCountId: string};
+  CycleCountCreate: undefined;
+  CycleCountPerform: {cycleCountId: string};
+  PhysicalInventoryList: undefined;
+  PhysicalInventoryDetails: {inventoryId: string};
+  PhysicalInventoryCreate: undefined;
+  PhysicalInventoryPerform: {inventoryId: string};
+  WasteLossList: undefined;
+  WasteLossDetails: {recordId: string};
+  WasteLossCreate: undefined;
+  LowStockAlerts: {locationId?: string};
+  InventoryTransactions: {filters?: any};
+  BarcodeScan: {onScan: (result: any) => void};
+  SerialNumberScan: {productId: string; onScan: (serial: string) => void};
 };
 
 // Products Stack Navigator

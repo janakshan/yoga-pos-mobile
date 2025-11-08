@@ -2,15 +2,13 @@ import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {MainTabParamList} from './types';
 import {DashboardScreen} from '@screens/dashboard/DashboardScreen';
+import {POSNavigator} from './POSNavigator';
 import {Theme} from '@constants/theme';
 import {Text} from 'react-native';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 // Placeholder screens for tabs
-const POSScreen = () => (
-  <Text style={{padding: 20}}>POS Screen - Coming Soon</Text>
-);
 const InventoryScreen = () => (
   <Text style={{padding: 20}}>Inventory Screen - Coming Soon</Text>
 );
@@ -65,10 +63,10 @@ export const MainNavigator = () => {
       />
       <Tab.Screen
         name="POS"
-        component={POSScreen}
+        component={POSNavigator}
         options={{
           tabBarLabel: 'POS',
-          headerTitle: 'Point of Sale',
+          headerShown: false,
         }}
       />
       <Tab.Screen

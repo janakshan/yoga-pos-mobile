@@ -314,34 +314,229 @@ export interface CustomerStats {
 // POS Transaction Types
 export interface POSTransaction {
   id?: string;
+  transactionNumber?: string;
   customerId?: string;
+  customer?: Customer;
   branchId: string;
+  cashierId?: string;
+  cashier?: User;
   items: POSItem[];
+  subtotal: number;
+  discountTotal: number;
+  cartDiscount?: Discount;
+  taxTotal: number;
+  total: number;
+  payments: POSPayment[];
+  amountPaid?: number;
+  change?: number;
+  loyaltyPointsEarned?: number;
+  loyaltyPointsUsed?: number;
+  notes?: string;
+  status: 'draft' | 'pending' | 'completed' | 'refunded' | 'partially_refunded' | 'cancelled' | 'on_hold';
+  isHeld?: boolean;
+  heldAt?: string;
+  heldBy?: string;
+  receiptNumber?: string;
+  receiptEmailSent?: boolean;
+  printCount?: number;
+  source?: 'pos' | 'fast_checkout' | 'online';
+  createdAt?: string;
+  updatedAt?: string;
+  completedAt?: string;
+}
+
+export interface POSItem {
+  id?: string;
+  productId: string;
+  product?: Product;
+  productName: string;
+  productSku?: string;
+  variantId?: string;
+  variant?: ProductVariant;
+  quantity: number;
+  unitPrice: number;
+  price: number;
+  discount?: Discount;
+  discountAmount?: number;
+  tax?: number;
+  taxRate?: number;
+  subtotal: number;
+  total: number;
+  isBundle?: boolean;
+  bundleItems?: POSItem[];
+  notes?: string;
+}
+
+export interface Discount {
+  type: 'percentage' | 'fixed';
+  value: number;
+  amount?: number;
+  reason?: string;
+  appliedBy?: string;
+}
+
+export interface POSPayment {
+  id?: string;
+  method: 'card' | 'cash' | 'mobile_payment' | 'bank_transfer' | 'store_credit';
+  amount: number;
+  reference?: string;
+  cardType?: string;
+  last4?: string;
+  approvalCode?: string;
+  status?: 'pending' | 'completed' | 'failed' | 'refunded';
+  processedAt?: string;
+}
+
+// Product Variant Types
+export interface ProductVariant {
+  id: string;
+  productId: string;
+  name: string;
+  sku?: string;
+  attributes: Record<string, string>; // e.g., {size: 'M', color: 'Blue'}
+  price?: number;
+  stockQuantity?: number;
+  imageUrl?: string;
+  status: 'active' | 'inactive';
+}
+
+// Bundle/Package Deal Types
+export interface ProductBundle {
+  id: string;
+  name: string;
+  description?: string;
+  items: BundleItem[];
+  price: number;
+  discountAmount?: number;
+  discountPercentage?: number;
+  imageUrl?: string;
+  status: 'active' | 'inactive';
+  validFrom?: string;
+  validUntil?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BundleItem {
+  productId: string;
+  quantity: number;
+  allowSubstitution?: boolean;
+}
+
+// Return & Refund Types
+export interface ReturnTransaction {
+  id?: string;
+  returnNumber?: string;
+  originalTransactionId: string;
+  originalTransaction?: POSTransaction;
+  customerId?: string;
+  customer?: Customer;
+  branchId: string;
+  items: ReturnItem[];
+  subtotal: number;
+  taxTotal: number;
+  total: number;
+  refundMethod: 'original_payment' | 'store_credit' | 'cash';
+  refundAmount: number;
+  restockingFee?: number;
+  reason: string;
+  reasonCategory?: 'damaged' | 'wrong_item' | 'not_satisfied' | 'defective' | 'other';
+  notes?: string;
+  processedBy?: string;
+  status: 'pending' | 'approved' | 'completed' | 'rejected';
+  images?: string[];
+  createdAt?: string;
+  completedAt?: string;
+}
+
+export interface ReturnItem {
+  id?: string;
+  transactionItemId?: string;
+  productId: string;
+  productName: string;
+  quantityReturned: number;
+  quantityPurchased: number;
+  unitPrice: number;
+  refundAmount: number;
+  condition?: 'new' | 'used' | 'damaged';
+  restock: boolean;
+}
+
+// Exchange Types
+export interface ExchangeTransaction {
+  id?: string;
+  exchangeNumber?: string;
+  returnTransaction: ReturnTransaction;
+  newTransaction: POSTransaction;
+  balanceDue?: number;
+  refundDue?: number;
+  status: 'pending' | 'completed';
+  createdAt?: string;
+  completedAt?: string;
+}
+
+// Receipt Types
+export interface Receipt {
+  transaction: POSTransaction;
+  business: BusinessInfo;
+  receiptSettings: ReceiptSettings;
+  qrCode?: string;
+  barcode?: string;
+}
+
+export interface BusinessInfo {
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  website?: string;
+  taxId?: string;
+  logo?: string;
+}
+
+export interface ReceiptSettings {
+  showLogo: boolean;
+  showBarcode: boolean;
+  showQrCode: boolean;
+  footerMessage?: string;
+  headerMessage?: string;
+  paperWidth: number; // in mm (58mm or 80mm)
+  fontSize: 'small' | 'medium' | 'large';
+}
+
+// Held Sale Types
+export interface HeldSale {
+  id: string;
+  name?: string;
+  transaction: Partial<POSTransaction>;
+  heldBy: string;
+  heldAt: string;
+  expiresAt?: string;
+  notes?: string;
+}
+
+// Category Types
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  parentId?: string;
+  imageUrl?: string;
+  sortOrder?: number;
+  isActive: boolean;
+  productCount?: number;
+}
+
+// Cart State Types
+export interface CartState {
+  items: POSItem[];
+  selectedCustomer?: Customer;
+  cartDiscount?: Discount;
   subtotal: number;
   discountTotal: number;
   taxTotal: number;
   total: number;
-  payments: POSPayment[];
-  loyaltyPointsEarned?: number;
   notes?: string;
-  status?: 'pending' | 'completed' | 'refunded' | 'cancelled';
-  timestamp?: string;
-}
-
-export interface POSItem {
-  productId: string;
-  productName?: string;
-  quantity: number;
-  price: number;
-  discount?: number;
-  tax?: number;
-  total?: number;
-}
-
-export interface POSPayment {
-  method: 'card' | 'cash' | 'mobile_payment' | 'bank_transfer' | 'store_credit';
-  amount: number;
-  reference?: string;
 }
 
 // Settings Types

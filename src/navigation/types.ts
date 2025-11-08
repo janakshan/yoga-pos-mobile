@@ -33,8 +33,14 @@ export type MainTabParamList = {
 // POS Stack Navigator
 export type POSStackParamList = {
   POSMain: undefined;
-  POSCheckout: {cartItems: any[]};
+  POSFastCheckout: undefined;
+  POSCheckout: undefined;
   POSReceipt: {transactionId: string};
+  POSReturns: undefined;
+  POSReturnDetails: {transactionId: string};
+  POSHeldSales: undefined;
+  POSBarcodeScan: {onScan: (barcode: string) => void};
+  POSCustomerSelect: undefined;
 };
 
 // Inventory Stack Navigator

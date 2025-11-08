@@ -6,6 +6,7 @@ import {POSNavigator} from './POSNavigator';
 import {ProductsNavigator} from './ProductsNavigator';
 import {InventoryNavigator} from './InventoryNavigator';
 import {CustomersNavigator} from './CustomersNavigator';
+import {BranchesNavigator} from './BranchesNavigator';
 import {ProcurementNavigator} from './ProcurementNavigator';
 import {FinancialNavigator} from './FinancialNavigator';
 import {ReportsNavigator} from './ReportsNavigator';
@@ -87,6 +88,14 @@ export const MainNavigator = () => {
         component={CustomersNavigator}
         options={{
           tabBarLabel: 'Customers',
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
+        name="Branches"
+        component={BranchesNavigator}
+        options={{
+          tabBarLabel: 'Branches',
           headerShown: false,
         }}
       />

@@ -27,6 +27,7 @@ export type MainTabParamList = {
   Inventory: NavigatorScreenParams<InventoryStackParamList>;
   Products: NavigatorScreenParams<ProductsStackParamList>;
   Customers: NavigatorScreenParams<CustomersStackParamList>;
+  Branches: NavigatorScreenParams<BranchesStackParamList>;
   Procurement: NavigatorScreenParams<ProcurementStackParamList>;
   Financial: NavigatorScreenParams<FinancialStackParamList>;
   Reports: NavigatorScreenParams<ReportsStackParamList>;
@@ -89,6 +90,15 @@ export type CustomersStackParamList = {
   CustomerDetails: {customerId: string};
   CustomerForm: {mode: 'create' | 'edit'; customerId?: string};
   CustomerQRScan: undefined;
+};
+
+// Branches Stack Navigator
+export type BranchesStackParamList = {
+  BranchList: undefined;
+  BranchDetails: {branchId: string};
+  BranchForm: {mode: 'create' | 'edit'; branchId?: string};
+  BranchDashboard: {branchId: string};
+  BranchComparison: undefined;
 };
 
 // Procurement Stack Navigator

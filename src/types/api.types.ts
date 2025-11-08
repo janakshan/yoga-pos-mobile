@@ -85,6 +85,15 @@ export enum Permission {
   CUSTOMER_UPDATE = 'customer.update',
   CUSTOMER_DELETE = 'customer.delete',
 
+  // Branch Permissions
+  BRANCH_VIEW = 'branch.view',
+  BRANCH_CREATE = 'branch.create',
+  BRANCH_UPDATE = 'branch.update',
+  BRANCH_DELETE = 'branch.delete',
+  BRANCH_MANAGE_STAFF = 'branch.manage_staff',
+  BRANCH_VIEW_PERFORMANCE = 'branch.view_performance',
+  BRANCH_MANAGE_SETTINGS = 'branch.manage_settings',
+
   // User Management
   USER_VIEW = 'user.view',
   USER_CREATE = 'user.create',
@@ -231,13 +240,44 @@ export interface Branch {
   country: string;
   phone: string;
   email: string;
+  fax?: string;
+  website?: string;
+
+  // Location
+  latitude?: number;
+  longitude?: number;
+
+  // Management
   managerId?: string;
   managerName?: string;
+  manager?: User;
+
+  // Status
   isActive: boolean;
+  status?: 'active' | 'inactive' | 'under_maintenance';
+
+  // Staff
   staffCount?: number;
+  staff?: User[];
+  staffIds?: string[];
+
+  // Performance Metrics
   monthlyRevenue?: number;
   transactionCount?: number;
+  performanceMetrics?: BranchPerformanceMetrics;
+
+  // Inventory
+  inventoryValue?: number;
+  lowStockItemCount?: number;
+
+  // Settings
   settings?: BranchSettings;
+
+  // Metadata
+  description?: string;
+  imageUrl?: string;
+  tags?: string[];
+  notes?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -246,7 +286,188 @@ export interface BranchSettings {
   timezone: string;
   currency: string;
   taxRate: number;
-  operatingHours?: Record<string, {open: string; close: string}>;
+  operatingHours?: BranchOperatingHours;
+  allowOnlineOrders?: boolean;
+  allowReservations?: boolean;
+  printerSettings?: BranchPrinterSettings;
+  paymentMethods?: string[];
+  autoStockTransfer?: boolean;
+  notificationSettings?: BranchNotificationSettings;
+}
+
+export interface BranchOperatingHours {
+  monday?: {open: string; close: string; isClosed?: boolean};
+  tuesday?: {open: string; close: string; isClosed?: boolean};
+  wednesday?: {open: string; close: string; isClosed?: boolean};
+  thursday?: {open: string; close: string; isClosed?: boolean};
+  friday?: {open: string; close: string; isClosed?: boolean};
+  saturday?: {open: string; close: string; isClosed?: boolean};
+  sunday?: {open: string; close: string; isClosed?: boolean};
+  holidays?: Array<{date: string; name: string; isClosed: boolean}>;
+}
+
+export interface BranchPrinterSettings {
+  receiptPrinter?: string;
+  labelPrinter?: string;
+  kitchenPrinter?: string;
+  autoPrintReceipt?: boolean;
+}
+
+export interface BranchNotificationSettings {
+  lowStockAlerts?: boolean;
+  dailySummary?: boolean;
+  customerFeedback?: boolean;
+  systemAlerts?: boolean;
+}
+
+export interface BranchPerformanceMetrics {
+  // Revenue
+  todayRevenue: number;
+  weekRevenue: number;
+  monthRevenue: number;
+  yearRevenue: number;
+
+  // Transactions
+  todayTransactions: number;
+  weekTransactions: number;
+  monthTransactions: number;
+  yearTransactions: number;
+
+  // Customers
+  todayCustomers: number;
+  weekCustomers: number;
+  monthCustomers: number;
+  totalCustomers: number;
+
+  // Performance Indicators
+  averageTransactionValue: number;
+  conversionRate?: number;
+  customerSatisfactionScore?: number;
+
+  // Inventory
+  inventoryTurnoverRate?: number;
+  stockAccuracy?: number;
+
+  // Comparison
+  revenueGrowth?: number; // percentage
+  transactionGrowth?: number; // percentage
+
+  // Rankings
+  branchRank?: number;
+  totalBranches?: number;
+}
+
+export interface BranchCreateRequest {
+  name: string;
+  code: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  phone: string;
+  email: string;
+  fax?: string;
+  website?: string;
+  latitude?: number;
+  longitude?: number;
+  managerId?: string;
+  description?: string;
+  imageUrl?: string;
+  tags?: string[];
+  settings?: Partial<BranchSettings>;
+}
+
+export interface BranchUpdateRequest {
+  name?: string;
+  code?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+  phone?: string;
+  email?: string;
+  fax?: string;
+  website?: string;
+  latitude?: number;
+  longitude?: number;
+  managerId?: string;
+  isActive?: boolean;
+  status?: 'active' | 'inactive' | 'under_maintenance';
+  description?: string;
+  imageUrl?: string;
+  tags?: string[];
+  notes?: string;
+  settings?: Partial<BranchSettings>;
+}
+
+export interface BranchStaffAssignment {
+  branchId: string;
+  userId: string;
+  role?: UserRole;
+  isPrimary?: boolean;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface BranchComparison {
+  branches: Branch[];
+  metrics: {
+    branchId: string;
+    branchName: string;
+    revenue: number;
+    transactions: number;
+    customers: number;
+    averageTransactionValue: number;
+    inventoryValue: number;
+    staffCount: number;
+    performanceScore?: number;
+  }[];
+  period: {
+    startDate: string;
+    endDate: string;
+  };
+}
+
+export interface BranchInventoryStatus {
+  branchId: string;
+  branchName: string;
+  totalItems: number;
+  totalValue: number;
+  lowStockItems: number;
+  outOfStockItems: number;
+  excessStockItems: number;
+  categories: Array<{
+    category: string;
+    itemCount: number;
+    value: number;
+  }>;
+}
+
+export interface BranchTransferRequest {
+  fromBranchId: string;
+  toBranchId: string;
+  items: Array<{
+    productId: string;
+    quantity: number;
+    notes?: string;
+  }>;
+  requestedBy?: string;
+  notes?: string;
+  urgency?: 'low' | 'medium' | 'high';
+}
+
+export interface BranchFilters {
+  search?: string;
+  status?: 'active' | 'inactive' | 'under_maintenance';
+  city?: string;
+  state?: string;
+  managerId?: string;
+  minRevenue?: number;
+  maxRevenue?: number;
+  sortBy?: 'name' | 'code' | 'revenue' | 'transactions' | 'createdAt';
+  sortOrder?: 'asc' | 'desc';
 }
 
 // Product Types

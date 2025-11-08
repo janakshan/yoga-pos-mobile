@@ -262,16 +262,22 @@ export interface Customer {
   phone: string;
   alternatePhone?: string;
   dateOfBirth?: string;
+  anniversary?: string;
   gender?: string;
   address?: Address;
   customerType: 'vip' | 'regular' | 'corporate';
   status: 'active' | 'inactive' | 'blocked';
   loyaltyInfo?: LoyaltyInfo;
+  loyaltyCardNumber?: string;
   creditInfo?: CreditInfo;
   storeCredit?: StoreCredit;
   stats?: CustomerStats;
   tags?: string[];
+  segments?: string[];
   notes?: string;
+  customFields?: Record<string, any>;
+  preferredContactMethod?: 'email' | 'sms' | 'phone' | 'push';
+  marketingOptIn?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -309,6 +315,58 @@ export interface CustomerStats {
   totalSpent: number;
   lastPurchaseDate?: string;
   averageOrderValue: number;
+  customerLifetimeValue?: number;
+  lastVisitDate?: string;
+  visitFrequency?: number; // visits per month
+}
+
+// Communication History
+export interface CommunicationRecord {
+  id: string;
+  customerId: string;
+  type: 'email' | 'sms' | 'phone' | 'in-person' | 'push';
+  subject?: string;
+  message: string;
+  direction: 'inbound' | 'outbound';
+  status: 'sent' | 'delivered' | 'failed' | 'read';
+  createdBy?: string;
+  createdAt: string;
+}
+
+// Customer Segments
+export interface CustomerSegment {
+  id: string;
+  name: string;
+  description?: string;
+  criteria: SegmentCriteria;
+  customerCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SegmentCriteria {
+  customerType?: ('vip' | 'regular' | 'corporate')[];
+  minTotalSpent?: number;
+  maxTotalSpent?: number;
+  minPurchases?: number;
+  maxPurchases?: number;
+  loyaltyTier?: ('bronze' | 'silver' | 'gold' | 'platinum')[];
+  tags?: string[];
+  lastPurchaseDays?: number; // customers who purchased within X days
+  inactive?: boolean; // customers who haven't purchased in X days
+}
+
+// Birthday & Anniversary
+export interface CustomerReminder {
+  id: string;
+  customerId: string;
+  customer?: Customer;
+  type: 'birthday' | 'anniversary';
+  date: string; // MM-DD format
+  notificationDate?: string;
+  message?: string;
+  status: 'pending' | 'sent' | 'cancelled';
+  createdAt: string;
 }
 
 // POS Transaction Types

@@ -12,15 +12,10 @@ import {RoleManagementNavigator} from './RoleManagementNavigator';
 import {ProcurementNavigator} from './ProcurementNavigator';
 import {FinancialNavigator} from './FinancialNavigator';
 import {ReportsNavigator} from './ReportsNavigator';
+import {MoreNavigator} from './MoreNavigator';
 import {Theme} from '@constants/theme';
-import {Text} from 'react-native';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
-
-// Placeholder screens for tabs
-const MoreScreen = () => (
-  <Text style={{padding: 20}}>More Screen - Coming Soon</Text>
-);
 
 /**
  * Main Navigator
@@ -143,7 +138,7 @@ export const MainNavigator = () => {
       />
       <Tab.Screen
         name="More"
-        component={MoreScreen}
+        component={MoreNavigator}
         options={{
           tabBarLabel: 'More',
           headerShown: false,

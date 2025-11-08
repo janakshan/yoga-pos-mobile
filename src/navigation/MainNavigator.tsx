@@ -6,6 +6,7 @@ import {POSNavigator} from './POSNavigator';
 import {ProductsNavigator} from './ProductsNavigator';
 import {InventoryNavigator} from './InventoryNavigator';
 import {CustomersNavigator} from './CustomersNavigator';
+import {ProcurementNavigator} from './ProcurementNavigator';
 import {Theme} from '@constants/theme';
 import {Text} from 'react-native';
 
@@ -84,6 +85,14 @@ export const MainNavigator = () => {
         component={CustomersNavigator}
         options={{
           tabBarLabel: 'Customers',
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
+        name="Procurement"
+        component={ProcurementNavigator}
+        options={{
+          tabBarLabel: 'Procurement',
           headerShown: false,
         }}
       />

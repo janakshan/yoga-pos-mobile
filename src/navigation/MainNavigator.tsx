@@ -8,6 +8,7 @@ import {InventoryNavigator} from './InventoryNavigator';
 import {CustomersNavigator} from './CustomersNavigator';
 import {BranchesNavigator} from './BranchesNavigator';
 import {UserManagementNavigator} from './UserManagementNavigator';
+import {RoleManagementNavigator} from './RoleManagementNavigator';
 import {ProcurementNavigator} from './ProcurementNavigator';
 import {FinancialNavigator} from './FinancialNavigator';
 import {ReportsNavigator} from './ReportsNavigator';
@@ -105,6 +106,14 @@ export const MainNavigator = () => {
         component={UserManagementNavigator}
         options={{
           tabBarLabel: 'Users',
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
+        name="RoleManagement"
+        component={RoleManagementNavigator}
+        options={{
+          tabBarLabel: 'Roles',
           headerShown: false,
         }}
       />

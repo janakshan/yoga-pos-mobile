@@ -29,6 +29,7 @@ export type MainTabParamList = {
   Customers: NavigatorScreenParams<CustomersStackParamList>;
   Branches: NavigatorScreenParams<BranchesStackParamList>;
   UserManagement: NavigatorScreenParams<UserManagementStackParamList>;
+  RoleManagement: NavigatorScreenParams<RoleManagementStackParamList>;
   Procurement: NavigatorScreenParams<ProcurementStackParamList>;
   Financial: NavigatorScreenParams<FinancialStackParamList>;
   Reports: NavigatorScreenParams<ReportsStackParamList>;
@@ -107,6 +108,14 @@ export type UserManagementStackParamList = {
   UserList: undefined;
   UserDetails: {userId: string};
   UserForm: {mode: 'create' | 'edit'; userId?: string};
+};
+
+// Role Management Stack Navigator
+export type RoleManagementStackParamList = {
+  RoleList: undefined;
+  RoleDetails: {roleId: string};
+  RoleForm: {mode: 'create' | 'edit'; roleId?: string};
+  RoleTemplates: undefined;
 };
 
 // Procurement Stack Navigator

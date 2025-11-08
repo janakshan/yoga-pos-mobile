@@ -310,6 +310,74 @@ export interface UserFilterParams extends PaginationParams {
   search?: string;
 }
 
+// Role Management Types
+export interface Role {
+  id: string;
+  name: string;
+  code: string;
+  description?: string;
+  permissions: Permission[];
+  hierarchy: number;
+  isSystemRole: boolean;
+  isCustom: boolean;
+  userCount?: number;
+  createdBy?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RoleStatistics {
+  totalUsers: number;
+  activeUsers: number;
+  inactiveUsers: number;
+  averagePermissions: number;
+  lastAssigned?: string;
+  topPermissions: {
+    permission: Permission;
+    count: number;
+  }[];
+}
+
+export interface RoleFilterParams extends PaginationParams {
+  search?: string;
+  isCustom?: boolean;
+  isSystemRole?: boolean;
+}
+
+export interface CreateRoleRequest {
+  name: string;
+  code: string;
+  description?: string;
+  permissions: Permission[];
+  hierarchy?: number;
+}
+
+export interface UpdateRoleRequest {
+  name?: string;
+  code?: string;
+  description?: string;
+  permissions?: Permission[];
+  hierarchy?: number;
+}
+
+export interface RoleTemplate {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  permissions: Permission[];
+  hierarchy: number;
+  category: 'sales' | 'inventory' | 'management' | 'kitchen' | 'custom';
+}
+
+export interface PermissionCategory {
+  id: string;
+  name: string;
+  description: string;
+  permissions: Permission[];
+  icon: string;
+}
+
 // Pagination
 export interface PaginationParams {
   page?: number;

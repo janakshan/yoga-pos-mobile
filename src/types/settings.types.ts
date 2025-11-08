@@ -72,10 +72,19 @@ export const CURRENCY_DISPLAYS: {value: CurrencyDisplay; label: string; example:
 ];
 
 // Printer connection types
-export type PrinterConnection = 'bluetooth' | 'usb' | 'wifi' | 'network';
+export type PrinterConnection = 'bluetooth' | 'usb' | 'network' | 'serial';
+
+// Printer types
+export type PrinterType = 'thermal' | 'inkjet' | 'laser';
 
 // Barcode scanner types
-export type BarcodeScannerType = 'camera' | 'bluetooth' | 'usb';
+export type BarcodeScannerType = 'camera' | 'bluetooth' | 'usb' | 'serial';
+
+// Cash drawer connection types
+export type CashDrawerConnection = 'printer' | 'serial' | 'usb';
+
+// Customer display types
+export type CustomerDisplayType = 'pole' | 'tablet' | 'monitor';
 
 // Notification channel types
 export type NotificationChannel = 'email' | 'sms' | 'whatsapp' | 'push';
@@ -133,28 +142,46 @@ export interface BrandingSettings {
 export interface HardwareSettings {
   receiptPrinter: {
     enabled: boolean;
-    connection: PrinterConnection;
+    type: PrinterType;
+    connectionType: PrinterConnection;
+    port?: string; // COM1, COM2, etc for serial
+    ipAddress?: string; // For network connection
     deviceName?: string;
-    deviceAddress?: string;
-    paperWidth: number; // mm
+    deviceAddress?: string; // Bluetooth MAC address
+    baudRate?: number; // For serial connection (9600, 19200, 38400, 115200)
+    paperWidth: number; // mm (58, 80, etc)
+    characterSet?: string; // CP437, UTF-8, etc
     autoCut: boolean;
+    openDrawer: boolean; // Trigger cash drawer via printer
   };
   barcodeScanner: {
     enabled: boolean;
     type: BarcodeScannerType;
+    port?: string; // For serial connection
     deviceName?: string;
-    deviceAddress?: string;
+    deviceAddress?: string; // Bluetooth MAC address
+    prefix?: string; // Prefix before scanned data
+    suffix?: string; // Suffix after scanned data
+    autoSubmit: boolean; // Auto-submit after scan
   };
   cashDrawer: {
     enabled: boolean;
-    autoOpen: boolean;
-    connectedToPrinter: boolean;
+    connectionType: CashDrawerConnection;
+    port?: string; // Serial/USB port
+    openOnSale: boolean; // Auto-open on sale completion
+    pulseWidth: number; // milliseconds (50-200)
   };
   customerDisplay: {
     enabled: boolean;
-    connection: PrinterConnection;
+    type: CustomerDisplayType;
+    connectionType: PrinterConnection;
+    port?: string; // For serial connection
+    ipAddress?: string; // For network connection
     deviceName?: string;
-    deviceAddress?: string;
+    deviceAddress?: string; // Bluetooth MAC address
+    baudRate?: number; // For serial connection
+    lines: number; // Number of display lines (2, 4, etc)
+    columns: number; // Characters per line (20, 40, etc)
   };
 }
 
@@ -233,22 +260,40 @@ export const DEFAULT_SETTINGS: AppSettings = {
   hardware: {
     receiptPrinter: {
       enabled: false,
-      connection: 'bluetooth',
+      type: 'thermal',
+      connectionType: 'bluetooth',
+      port: 'COM1',
+      ipAddress: '192.168.1.100',
+      baudRate: 9600,
       paperWidth: 80,
+      characterSet: 'CP437',
       autoCut: true,
+      openDrawer: false,
     },
     barcodeScanner: {
       enabled: false,
       type: 'camera',
+      port: 'COM2',
+      prefix: '',
+      suffix: '',
+      autoSubmit: true,
     },
     cashDrawer: {
       enabled: false,
-      autoOpen: false,
-      connectedToPrinter: true,
+      connectionType: 'printer',
+      port: '',
+      openOnSale: true,
+      pulseWidth: 100,
     },
     customerDisplay: {
       enabled: false,
-      connection: 'bluetooth',
+      type: 'pole',
+      connectionType: 'serial',
+      port: 'COM3',
+      ipAddress: '',
+      baudRate: 9600,
+      lines: 2,
+      columns: 20,
     },
   },
   notifications: {

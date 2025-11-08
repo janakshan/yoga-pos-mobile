@@ -3,18 +3,20 @@
  * Receipt printer, barcode scanner, cash drawer, and customer display settings
  */
 
-import React from 'react';
-import {View, Alert} from 'react-native';
+import React, {useState} from 'react';
+import {View, Alert, ActivityIndicator} from 'react-native';
 import {SettingSection} from './SettingSection';
 import {SettingItem} from './SettingItem';
 import {SettingSwitch} from './SettingSwitch';
 import {Button} from '@components/ui';
 import {Spacer} from '@components/layout';
 import {useSettingsStore} from '@/store/slices/settingsSlice';
+import {HardwareManager} from '@/services/hardware';
 
 export const HardwareSettingsSection: React.FC = () => {
   const {settings, updateHardwareSettings} = useSettingsStore();
   const hardware = settings.hardware;
+  const [testingDevice, setTestingDevice] = useState<string | null>(null);
 
   const handleTestPrinter = () => {
     Alert.alert(
@@ -24,9 +26,20 @@ export const HardwareSettingsSection: React.FC = () => {
         {text: 'Cancel', style: 'cancel'},
         {
           text: 'Print Test',
-          onPress: () => {
-            // TODO: Implement actual printer test
-            Alert.alert('Success', 'Test print sent successfully!');
+          onPress: async () => {
+            setTestingDevice('printer');
+            try {
+              const success = await HardwareManager.printTestPage();
+              if (success) {
+                Alert.alert('Success', 'Test print sent successfully!');
+              } else {
+                Alert.alert('Error', 'Failed to print test page. Please check printer connection.');
+              }
+            } catch (error) {
+              Alert.alert('Error', 'An error occurred while testing the printer.');
+            } finally {
+              setTestingDevice(null);
+            }
           },
         },
       ]
@@ -41,9 +54,20 @@ export const HardwareSettingsSection: React.FC = () => {
         {text: 'Cancel', style: 'cancel'},
         {
           text: 'Test Scanner',
-          onPress: () => {
-            // TODO: Implement actual scanner test
-            Alert.alert('Success', 'Scanner is working correctly!');
+          onPress: async () => {
+            setTestingDevice('scanner');
+            try {
+              const success = await HardwareManager.testScanner();
+              if (success) {
+                Alert.alert('Success', 'Scanner is working correctly!');
+              } else {
+                Alert.alert('Error', 'Failed to test scanner. Please check scanner connection.');
+              }
+            } catch (error) {
+              Alert.alert('Error', 'An error occurred while testing the scanner.');
+            } finally {
+              setTestingDevice(null);
+            }
           },
         },
       ]
@@ -58,9 +82,20 @@ export const HardwareSettingsSection: React.FC = () => {
         {text: 'Cancel', style: 'cancel'},
         {
           text: 'Open Drawer',
-          onPress: () => {
-            // TODO: Implement actual cash drawer trigger
-            Alert.alert('Success', 'Cash drawer opened!');
+          onPress: async () => {
+            setTestingDevice('drawer');
+            try {
+              const success = await HardwareManager.testCashDrawer();
+              if (success) {
+                Alert.alert('Success', 'Cash drawer opened!');
+              } else {
+                Alert.alert('Error', 'Failed to open cash drawer. Please check connection.');
+              }
+            } catch (error) {
+              Alert.alert('Error', 'An error occurred while opening the cash drawer.');
+            } finally {
+              setTestingDevice(null);
+            }
           },
         },
       ]
@@ -75,9 +110,20 @@ export const HardwareSettingsSection: React.FC = () => {
         {text: 'Cancel', style: 'cancel'},
         {
           text: 'Test Display',
-          onPress: () => {
-            // TODO: Implement actual display test
-            Alert.alert('Success', 'Display is working correctly!');
+          onPress: async () => {
+            setTestingDevice('display');
+            try {
+              const success = await HardwareManager.testDisplay();
+              if (success) {
+                Alert.alert('Success', 'Display is working correctly!');
+              } else {
+                Alert.alert('Error', 'Failed to test display. Please check connection.');
+              }
+            } catch (error) {
+              Alert.alert('Error', 'An error occurred while testing the display.');
+            } finally {
+              setTestingDevice(null);
+            }
           },
         },
       ]
@@ -107,8 +153,8 @@ export const HardwareSettingsSection: React.FC = () => {
               label="Connection Type"
               description="How the printer connects"
               value={
-                hardware.receiptPrinter.connection.charAt(0).toUpperCase() +
-                hardware.receiptPrinter.connection.slice(1)
+                hardware.receiptPrinter.connectionType.charAt(0).toUpperCase() +
+                hardware.receiptPrinter.connectionType.slice(1)
               }
             />
 
@@ -254,8 +300,8 @@ export const HardwareSettingsSection: React.FC = () => {
               label="Connection Type"
               description="How the display connects"
               value={
-                hardware.customerDisplay.connection.charAt(0).toUpperCase() +
-                hardware.customerDisplay.connection.slice(1)
+                hardware.customerDisplay.connectionType.charAt(0).toUpperCase() +
+                hardware.customerDisplay.connectionType.slice(1)
               }
             />
 

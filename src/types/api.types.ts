@@ -71,6 +71,14 @@ export enum Permission {
   INVENTORY_MANAGE = 'inventory.manage',
   INVENTORY_ADJUST = 'inventory.adjust',
 
+  // Procurement Permissions
+  PROCUREMENT_VIEW = 'procurement.view',
+  PROCUREMENT_CREATE = 'procurement.create',
+  PROCUREMENT_APPROVE = 'procurement.approve',
+  PROCUREMENT_RECEIVE = 'procurement.receive',
+  SUPPLIER_VIEW = 'supplier.view',
+  SUPPLIER_MANAGE = 'supplier.manage',
+
   // Customer Permissions
   CUSTOMER_VIEW = 'customer.view',
   CUSTOMER_CREATE = 'customer.create',
@@ -1157,6 +1165,351 @@ export interface OfflineInventorySync {
   id: string;
   type: 'count' | 'adjustment' | 'transfer';
   data: any;
+  status: 'pending' | 'syncing' | 'synced' | 'failed';
+  createdAt: string;
+  syncedAt?: string;
+  error?: string;
+}
+
+// ============================================================
+// PURCHASE & PROCUREMENT TYPES
+// ============================================================
+
+// Supplier Types
+export interface Supplier {
+  id: string;
+  code: string;
+  name: string;
+  contactPerson?: string;
+  email: string;
+  phone: string;
+  alternatePhone?: string;
+  website?: string;
+  address?: Address;
+  taxId?: string;
+  bankDetails?: BankDetails;
+  paymentTerms: PaymentTerms;
+  productCategories?: string[];
+  products?: SupplierProduct[];
+  currency: string;
+  rating?: number; // 1-5 rating
+  status: 'active' | 'inactive' | 'blacklisted';
+  performance?: SupplierPerformance;
+  tags?: string[];
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BankDetails {
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+  routingNumber?: string;
+  swiftCode?: string;
+  iban?: string;
+}
+
+export interface PaymentTerms {
+  termType: 'net_15' | 'net_30' | 'net_45' | 'net_60' | 'cod' | 'advance' | 'custom';
+  daysUntilDue?: number;
+  discountPercentage?: number; // Early payment discount
+  discountDays?: number; // Days to qualify for discount
+  lateFeePercentage?: number;
+  notes?: string;
+}
+
+export interface SupplierProduct {
+  id: string;
+  supplierId: string;
+  productId: string;
+  product?: Product;
+  sku: string;
+  name: string;
+  description?: string;
+  unitPrice: number;
+  currency: string;
+  minimumOrderQuantity?: number;
+  leadTimeDays?: number;
+  isPreferred: boolean;
+  lastPurchaseDate?: string;
+  lastPurchasePrice?: number;
+  averagePrice?: number;
+  totalPurchased?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SupplierPerformance {
+  totalOrders: number;
+  completedOrders: number;
+  cancelledOrders: number;
+  totalValue: number;
+  averageOrderValue: number;
+  onTimeDeliveryRate: number; // Percentage
+  qualityRating: number; // 1-5 rating
+  averageLeadTime: number; // Days
+  lastOrderDate?: string;
+  returnRate?: number; // Percentage of items returned
+  defectRate?: number; // Percentage of defective items
+}
+
+// Purchase Order Types
+export enum PurchaseOrderStatus {
+  DRAFT = 'draft',
+  SENT = 'sent',
+  CONFIRMED = 'confirmed',
+  PARTIALLY_RECEIVED = 'partially_received',
+  RECEIVED = 'received',
+  CANCELLED = 'cancelled',
+  CLOSED = 'closed',
+}
+
+export enum PurchaseOrderApprovalStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+}
+
+export interface PurchaseOrder {
+  id: string;
+  poNumber: string;
+  supplierId: string;
+  supplier?: Supplier;
+  locationId: string;
+  location?: InventoryLocation;
+  status: PurchaseOrderStatus;
+  approvalStatus?: PurchaseOrderApprovalStatus;
+  items: PurchaseOrderItem[];
+  subtotal: number;
+  discountAmount?: number;
+  discountPercentage?: number;
+  taxAmount: number;
+  taxRate?: number;
+  shippingCost?: number;
+  otherCosts?: number;
+  total: number;
+  currency: string;
+  paymentTerms?: PaymentTerms;
+  expectedDeliveryDate?: string;
+  actualDeliveryDate?: string;
+  deliveryAddress?: Address;
+  createdBy: string;
+  createdByUser?: User;
+  approvedBy?: string;
+  approvedByUser?: User;
+  sentBy?: string;
+  sentByUser?: User;
+  receivedBy?: string;
+  receivedByUser?: User;
+  notes?: string;
+  internalNotes?: string;
+  termsAndConditions?: string;
+  documents?: PODocument[];
+  trackingNumber?: string;
+  carrier?: string;
+  createdAt: string;
+  updatedAt: string;
+  sentAt?: string;
+  approvedAt?: string;
+  receivedAt?: string;
+  closedAt?: string;
+}
+
+export interface PurchaseOrderItem {
+  id: string;
+  purchaseOrderId: string;
+  productId: string;
+  product?: Product;
+  variantId?: string;
+  variant?: ProductVariant;
+  sku: string;
+  name: string;
+  description?: string;
+  quantityOrdered: number;
+  quantityReceived: number;
+  quantityRemaining?: number;
+  unitPrice: number;
+  discountPercentage?: number;
+  discountAmount?: number;
+  taxRate?: number;
+  taxAmount?: number;
+  subtotal: number;
+  total: number;
+  notes?: string;
+  receivedItems?: ReceivedItem[];
+}
+
+export interface ReceivedItem {
+  id: string;
+  purchaseOrderItemId: string;
+  quantity: number;
+  unitCost: number;
+  totalCost: number;
+  condition: 'good' | 'damaged' | 'defective';
+  serialNumbers?: string[];
+  batchNumber?: string;
+  expiryDate?: string;
+  receivedBy: string;
+  receivedByUser?: User;
+  receivedAt: string;
+  locationId?: string;
+  location?: InventoryLocation;
+  signature?: string;
+  images?: string[];
+  notes?: string;
+}
+
+export interface PODocument {
+  id: string;
+  purchaseOrderId: string;
+  type: 'quote' | 'invoice' | 'delivery_note' | 'receipt' | 'contract' | 'other';
+  name: string;
+  url: string;
+  fileSize?: number;
+  mimeType?: string;
+  uploadedBy: string;
+  uploadedByUser?: User;
+  uploadedAt: string;
+  notes?: string;
+}
+
+// PO Approval Workflow Types
+export interface POApprovalRequest {
+  id: string;
+  purchaseOrderId: string;
+  purchaseOrder?: PurchaseOrder;
+  requestedBy: string;
+  requestedByUser?: User;
+  requestedAt: string;
+  requiredApprovers?: string[];
+  approvals: POApproval[];
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled';
+  finalizedAt?: string;
+  notes?: string;
+}
+
+export interface POApproval {
+  id: string;
+  approvalRequestId: string;
+  approverId: string;
+  approver?: User;
+  status: 'pending' | 'approved' | 'rejected';
+  comments?: string;
+  approvedAt?: string;
+  level?: number; // For multi-level approval
+}
+
+// Receiving Management Types
+export interface ReceivingSession {
+  id: string;
+  sessionNumber: string;
+  purchaseOrderId: string;
+  purchaseOrder?: PurchaseOrder;
+  locationId: string;
+  location?: InventoryLocation;
+  items: ReceivingSessionItem[];
+  status: 'in_progress' | 'completed' | 'cancelled';
+  receivedBy: string;
+  receivedByUser?: User;
+  startedAt: string;
+  completedAt?: string;
+  totalItemsExpected: number;
+  totalItemsReceived: number;
+  discrepancies?: ReceivingDiscrepancy[];
+  signature?: string;
+  deliverySignature?: string;
+  documents?: string[];
+  images?: string[];
+  notes?: string;
+}
+
+export interface ReceivingSessionItem {
+  id: string;
+  sessionId: string;
+  purchaseOrderItemId: string;
+  productId: string;
+  product?: Product;
+  variantId?: string;
+  variant?: ProductVariant;
+  quantityExpected: number;
+  quantityReceived: number;
+  quantityAccepted: number;
+  quantityRejected: number;
+  condition: 'good' | 'damaged' | 'defective' | 'mixed';
+  serialNumbers?: string[];
+  batchNumber?: string;
+  expiryDate?: string;
+  notes?: string;
+}
+
+export interface ReceivingDiscrepancy {
+  id: string;
+  sessionId: string;
+  type: 'quantity_mismatch' | 'quality_issue' | 'wrong_item' | 'damaged' | 'missing';
+  productId: string;
+  product?: Product;
+  expectedQuantity?: number;
+  receivedQuantity?: number;
+  description: string;
+  resolution?: 'accepted' | 'rejected' | 'partial_acceptance' | 'return_to_supplier';
+  images?: string[];
+  reportedBy: string;
+  reportedByUser?: User;
+  reportedAt: string;
+}
+
+// Procurement Dashboard Types
+export interface ProcurementDashboard {
+  summary: {
+    totalPurchaseOrders: number;
+    totalValue: number;
+    pendingApprovals: number;
+    pendingReceiving: number;
+    activeSuppliers: number;
+    averageLeadTime: number;
+  };
+  recentPurchaseOrders: PurchaseOrder[];
+  pendingApprovals: POApprovalRequest[];
+  pendingReceiving: PurchaseOrder[];
+  topSuppliers: Array<{
+    supplier: Supplier;
+    totalOrders: number;
+    totalValue: number;
+  }>;
+  lowPerformingSuppliers: Array<{
+    supplier: Supplier;
+    issues: string[];
+  }>;
+}
+
+// Procurement Filters & Search Types
+export interface ProcurementFilters extends PaginationParams {
+  supplierId?: string;
+  locationId?: string;
+  status?: PurchaseOrderStatus;
+  approvalStatus?: PurchaseOrderApprovalStatus;
+  dateFrom?: string;
+  dateTo?: string;
+  searchTerm?: string;
+  minTotal?: number;
+  maxTotal?: number;
+  createdBy?: string;
+}
+
+export interface SupplierFilters extends PaginationParams {
+  status?: 'active' | 'inactive' | 'blacklisted';
+  category?: string;
+  minRating?: number;
+  searchTerm?: string;
+  tags?: string[];
+}
+
+// Offline Procurement Types
+export interface OfflinePurchaseOrder {
+  id: string;
+  localId: string;
+  data: Partial<PurchaseOrder>;
   status: 'pending' | 'syncing' | 'synced' | 'failed';
   createdAt: string;
   syncedAt?: string;

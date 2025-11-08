@@ -27,6 +27,7 @@ export type MainTabParamList = {
   Inventory: NavigatorScreenParams<InventoryStackParamList>;
   Products: NavigatorScreenParams<ProductsStackParamList>;
   Customers: NavigatorScreenParams<CustomersStackParamList>;
+  Procurement: NavigatorScreenParams<ProcurementStackParamList>;
   More: NavigatorScreenParams<MoreStackParamList>;
 };
 
@@ -86,6 +87,18 @@ export type CustomersStackParamList = {
   CustomerDetails: {customerId: string};
   CustomerForm: {mode: 'create' | 'edit'; customerId?: string};
   CustomerQRScan: undefined;
+};
+
+// Procurement Stack Navigator
+export type ProcurementStackParamList = {
+  SupplierList: undefined;
+  SupplierDetails: {supplierId: string};
+  SupplierForm: {mode: 'create' | 'edit'; supplierId?: string};
+  PurchaseOrderList: undefined;
+  PurchaseOrderDetails: {purchaseOrderId: string};
+  PurchaseOrderForm: {mode: 'create' | 'edit'; purchaseOrderId?: string};
+  POApproval: undefined;
+  Receiving: {purchaseOrderId: string; locationId: string};
 };
 
 // More Stack Navigator

@@ -589,3 +589,518 @@ export interface BackupSettings {
   frequency: 'hourly' | 'daily' | 'weekly' | 'monthly';
   cloudProvider?: 'google_drive' | 'dropbox' | 's3';
 }
+
+// ============================================================
+// INVENTORY MANAGEMENT TYPES
+// ============================================================
+
+// Inventory Location Types
+export interface InventoryLocation {
+  id: string;
+  name: string;
+  type: 'branch' | 'warehouse' | 'storage' | 'transit';
+  branchId?: string;
+  branch?: Branch;
+  address?: Address;
+  isActive: boolean;
+  managerId?: string;
+  managerName?: string;
+  capacity?: number;
+  currentUtilization?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Stock Level Types
+export interface StockLevel {
+  id: string;
+  productId: string;
+  product?: Product;
+  variantId?: string;
+  variant?: ProductVariant;
+  locationId: string;
+  location?: InventoryLocation;
+  quantity: number;
+  committedQuantity: number; // Reserved for orders
+  availableQuantity: number; // quantity - committedQuantity
+  lowStockThreshold?: number;
+  reorderPoint?: number;
+  reorderQuantity?: number;
+  lastCountedAt?: string;
+  lastCountedBy?: string;
+  status: 'in_stock' | 'low_stock' | 'out_of_stock' | 'overstock';
+  updatedAt: string;
+}
+
+// Inventory Transaction Types
+export enum InventoryTransactionType {
+  STOCK_IN = 'stock_in',
+  STOCK_OUT = 'stock_out',
+  TRANSFER = 'transfer',
+  ADJUSTMENT = 'adjustment',
+  RETURN_TO_SUPPLIER = 'return_to_supplier',
+  DAMAGE = 'damage',
+  LOSS = 'loss',
+  WASTE = 'waste',
+  CYCLE_COUNT = 'cycle_count',
+  PHYSICAL_COUNT = 'physical_count',
+  SALE = 'sale',
+  PURCHASE = 'purchase',
+  PRODUCTION = 'production',
+}
+
+export interface InventoryTransaction {
+  id: string;
+  transactionNumber: string;
+  type: InventoryTransactionType;
+  productId: string;
+  product?: Product;
+  variantId?: string;
+  variant?: ProductVariant;
+  fromLocationId?: string;
+  fromLocation?: InventoryLocation;
+  toLocationId?: string;
+  toLocation?: InventoryLocation;
+  quantity: number;
+  unitCost?: number;
+  totalCost?: number;
+  reason?: string;
+  reasonCategory?: 'damaged' | 'expired' | 'lost' | 'stolen' | 'adjustment' | 'transfer' | 'return' | 'other';
+  notes?: string;
+  referenceType?: 'purchase_order' | 'sales_order' | 'transfer' | 'adjustment' | 'count' | 'manual';
+  referenceId?: string;
+  serialNumbers?: string[];
+  batchNumber?: string;
+  expiryDate?: string;
+  createdBy: string;
+  createdByUser?: User;
+  approvedBy?: string;
+  approvedByUser?: User;
+  status: 'pending' | 'approved' | 'completed' | 'cancelled' | 'rejected';
+  images?: string[];
+  signature?: string;
+  createdAt: string;
+  approvedAt?: string;
+  completedAt?: string;
+}
+
+// Stock Transfer Types
+export interface StockTransfer {
+  id: string;
+  transferNumber: string;
+  fromLocationId: string;
+  fromLocation?: InventoryLocation;
+  toLocationId: string;
+  toLocation?: InventoryLocation;
+  items: StockTransferItem[];
+  status: 'draft' | 'pending' | 'in_transit' | 'received' | 'partially_received' | 'cancelled';
+  totalItems: number;
+  totalQuantity: number;
+  estimatedValue: number;
+  requestedBy: string;
+  requestedByUser?: User;
+  approvedBy?: string;
+  approvedByUser?: User;
+  sentBy?: string;
+  sentByUser?: User;
+  receivedBy?: string;
+  receivedByUser?: User;
+  requestedAt: string;
+  approvedAt?: string;
+  sentAt?: string;
+  receivedAt?: string;
+  expectedDeliveryDate?: string;
+  actualDeliveryDate?: string;
+  trackingNumber?: string;
+  carrier?: string;
+  notes?: string;
+  senderSignature?: string;
+  receiverSignature?: string;
+  images?: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StockTransferItem {
+  id: string;
+  transferId: string;
+  productId: string;
+  product?: Product;
+  variantId?: string;
+  variant?: ProductVariant;
+  quantityRequested: number;
+  quantityApproved?: number;
+  quantitySent: number;
+  quantityReceived: number;
+  unitCost?: number;
+  serialNumbers?: string[];
+  batchNumber?: string;
+  condition?: 'good' | 'damaged' | 'defective';
+  notes?: string;
+}
+
+// Stock Adjustment Types
+export interface StockAdjustment {
+  id: string;
+  adjustmentNumber: string;
+  locationId: string;
+  location?: InventoryLocation;
+  items: StockAdjustmentItem[];
+  type: 'increase' | 'decrease';
+  reason: string;
+  reasonCategory: 'damage' | 'loss' | 'found' | 'correction' | 'waste' | 'theft' | 'expired' | 'other';
+  totalItems: number;
+  totalAdjustmentValue: number;
+  status: 'draft' | 'pending' | 'approved' | 'completed' | 'rejected';
+  createdBy: string;
+  createdByUser?: User;
+  approvedBy?: string;
+  approvedByUser?: User;
+  notes?: string;
+  images?: string[];
+  createdAt: string;
+  approvedAt?: string;
+  completedAt?: string;
+}
+
+export interface StockAdjustmentItem {
+  id: string;
+  adjustmentId: string;
+  productId: string;
+  product?: Product;
+  variantId?: string;
+  variant?: ProductVariant;
+  currentQuantity: number;
+  adjustmentQuantity: number;
+  newQuantity: number;
+  unitCost?: number;
+  totalCost?: number;
+  reason?: string;
+  serialNumbers?: string[];
+  batchNumber?: string;
+  notes?: string;
+}
+
+// Cycle Count Types
+export interface CycleCount {
+  id: string;
+  countNumber: string;
+  locationId: string;
+  location?: InventoryLocation;
+  type: 'full' | 'partial' | 'category' | 'abc_analysis';
+  categoryId?: string;
+  category?: Category;
+  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+  scheduledDate: string;
+  startedAt?: string;
+  completedAt?: string;
+  items: CycleCountItem[];
+  totalItems: number;
+  countedItems: number;
+  discrepancies: number;
+  totalDiscrepancyValue: number;
+  assignedTo?: string;
+  assignedToUser?: User;
+  countedBy?: string;
+  countedByUser?: User;
+  reviewedBy?: string;
+  reviewedByUser?: User;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CycleCountItem {
+  id: string;
+  cycleCountId: string;
+  productId: string;
+  product?: Product;
+  variantId?: string;
+  variant?: ProductVariant;
+  systemQuantity: number;
+  countedQuantity?: number;
+  discrepancy?: number;
+  discrepancyValue?: number;
+  status: 'pending' | 'counted' | 'verified' | 'adjusted';
+  serialNumbers?: string[];
+  batchNumber?: string;
+  notes?: string;
+  countedAt?: string;
+  verifiedAt?: string;
+}
+
+// Physical Inventory Types
+export interface PhysicalInventory {
+  id: string;
+  inventoryNumber: string;
+  locationId: string;
+  location?: InventoryLocation;
+  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+  scheduledDate: string;
+  startedAt?: string;
+  completedAt?: string;
+  items: PhysicalInventoryItem[];
+  totalItems: number;
+  countedItems: number;
+  discrepancies: number;
+  totalDiscrepancyValue: number;
+  totalInventoryValue: number;
+  assignedTeam?: string[];
+  assignedUsers?: User[];
+  supervisorId?: string;
+  supervisor?: User;
+  freezeStock: boolean; // Prevent stock movements during count
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PhysicalInventoryItem {
+  id: string;
+  physicalInventoryId: string;
+  productId: string;
+  product?: Product;
+  variantId?: string;
+  variant?: ProductVariant;
+  systemQuantity: number;
+  firstCount?: number;
+  secondCount?: number;
+  thirdCount?: number;
+  finalCount?: number;
+  discrepancy?: number;
+  discrepancyPercentage?: number;
+  discrepancyValue?: number;
+  unitCost?: number;
+  totalValue?: number;
+  status: 'pending' | 'first_count' | 'second_count' | 'third_count' | 'verified' | 'adjusted';
+  requiresRecount: boolean;
+  serialNumbers?: string[];
+  batchNumbers?: string[];
+  location?: string; // Bin/shelf location
+  countedBy?: string[];
+  countedByUsers?: User[];
+  verifiedBy?: string;
+  verifiedByUser?: User;
+  notes?: string;
+  images?: string[];
+  countedAt?: string;
+  verifiedAt?: string;
+}
+
+// Serial Number Tracking Types
+export interface SerialNumber {
+  id: string;
+  serialNumber: string;
+  productId: string;
+  product?: Product;
+  variantId?: string;
+  variant?: ProductVariant;
+  locationId?: string;
+  location?: InventoryLocation;
+  status: 'available' | 'sold' | 'reserved' | 'damaged' | 'returned' | 'in_transit';
+  purchaseOrderId?: string;
+  receivedDate?: string;
+  soldDate?: string;
+  soldToCustomerId?: string;
+  soldToCustomer?: Customer;
+  transactionId?: string;
+  transaction?: POSTransaction;
+  warrantyExpiryDate?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Low Stock Alert Types
+export interface LowStockAlert {
+  id: string;
+  productId: string;
+  product?: Product;
+  variantId?: string;
+  variant?: ProductVariant;
+  locationId: string;
+  location?: InventoryLocation;
+  currentQuantity: number;
+  threshold: number;
+  severity: 'low' | 'critical' | 'out_of_stock';
+  status: 'active' | 'acknowledged' | 'resolved' | 'ignored';
+  acknowledgedBy?: string;
+  acknowledgedByUser?: User;
+  acknowledgedAt?: string;
+  resolvedAt?: string;
+  reorderSuggested: boolean;
+  suggestedReorderQuantity?: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Waste/Loss Tracking Types
+export interface WasteLossRecord {
+  id: string;
+  recordNumber: string;
+  type: 'waste' | 'loss' | 'damage' | 'theft' | 'expired' | 'shrinkage';
+  locationId: string;
+  location?: InventoryLocation;
+  items: WasteLossItem[];
+  totalItems: number;
+  totalQuantity: number;
+  totalValue: number;
+  reason: string;
+  reasonCategory: 'operational' | 'customer' | 'supplier' | 'theft' | 'natural' | 'other';
+  description?: string;
+  reportedBy: string;
+  reportedByUser?: User;
+  verifiedBy?: string;
+  verifiedByUser?: User;
+  status: 'reported' | 'investigating' | 'verified' | 'closed';
+  policeReportNumber?: string;
+  insuranceClaimNumber?: string;
+  images?: string[];
+  notes?: string;
+  reportedAt: string;
+  verifiedAt?: string;
+  closedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WasteLossItem {
+  id: string;
+  wasteLossRecordId: string;
+  productId: string;
+  product?: Product;
+  variantId?: string;
+  variant?: ProductVariant;
+  quantity: number;
+  unitCost: number;
+  totalValue: number;
+  serialNumbers?: string[];
+  batchNumber?: string;
+  expiryDate?: string;
+  condition?: 'damaged' | 'expired' | 'missing' | 'defective';
+  recoverable: boolean;
+  notes?: string;
+}
+
+// Inventory Report Types
+export interface InventoryReport {
+  type: 'stock_level' | 'movement' | 'valuation' | 'turnover' | 'aging' | 'variance';
+  dateFrom: string;
+  dateTo: string;
+  locationId?: string;
+  categoryId?: string;
+  generatedAt: string;
+  generatedBy: string;
+  data: any; // Specific to report type
+}
+
+export interface StockLevelReport {
+  locationId: string;
+  location?: InventoryLocation;
+  categories: {
+    category: Category;
+    products: Array<{
+      product: Product;
+      quantity: number;
+      value: number;
+      status: string;
+    }>;
+  }[];
+  summary: {
+    totalProducts: number;
+    totalQuantity: number;
+    totalValue: number;
+    lowStockItems: number;
+    outOfStockItems: number;
+  };
+}
+
+export interface InventoryMovementReport {
+  locationId?: string;
+  dateFrom: string;
+  dateTo: string;
+  transactions: InventoryTransaction[];
+  summary: {
+    totalTransactions: number;
+    stockIn: number;
+    stockOut: number;
+    transfers: number;
+    adjustments: number;
+    totalValue: number;
+  };
+}
+
+// Inventory Filter & Search Types
+export interface InventoryFilters extends PaginationParams {
+  locationId?: string;
+  productId?: string;
+  categoryId?: string;
+  status?: string;
+  type?: InventoryTransactionType;
+  dateFrom?: string;
+  dateTo?: string;
+  searchTerm?: string;
+  minQuantity?: number;
+  maxQuantity?: number;
+  lowStock?: boolean;
+  outOfStock?: boolean;
+}
+
+// Batch Operations Types
+export interface BatchStockUpdate {
+  updates: Array<{
+    productId: string;
+    variantId?: string;
+    locationId: string;
+    quantity: number;
+    operation: 'set' | 'add' | 'subtract';
+  }>;
+  reason?: string;
+  notes?: string;
+}
+
+// Inventory Dashboard Types
+export interface InventoryDashboard {
+  summary: {
+    totalProducts: number;
+    totalValue: number;
+    lowStockItems: number;
+    outOfStockItems: number;
+    pendingTransfers: number;
+    pendingAdjustments: number;
+    activeAlerts: number;
+  };
+  recentTransactions: InventoryTransaction[];
+  lowStockAlerts: LowStockAlert[];
+  pendingTransfers: StockTransfer[];
+  topMovingProducts: Array<{
+    product: Product;
+    quantity: number;
+    value: number;
+  }>;
+  stockByLocation: Array<{
+    location: InventoryLocation;
+    totalProducts: number;
+    totalValue: number;
+  }>;
+}
+
+// Barcode Scan Result Types
+export interface BarcodeScanResult {
+  type: 'product' | 'serial_number' | 'batch' | 'location';
+  code: string;
+  data?: Product | SerialNumber | InventoryLocation;
+  scannedAt: string;
+}
+
+// Offline Sync Types
+export interface OfflineInventorySync {
+  id: string;
+  type: 'count' | 'adjustment' | 'transfer';
+  data: any;
+  status: 'pending' | 'syncing' | 'synced' | 'failed';
+  createdAt: string;
+  syncedAt?: string;
+  error?: string;
+}

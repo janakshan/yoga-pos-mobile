@@ -84,8 +84,8 @@ export type ProductsStackParamList = {
 export type CustomersStackParamList = {
   CustomerList: undefined;
   CustomerDetails: {customerId: string};
-  CustomerCreate: undefined;
-  CustomerEdit: {customerId: string};
+  CustomerForm: {mode: 'create' | 'edit'; customerId?: string};
+  CustomerQRScan: undefined;
 };
 
 // More Stack Navigator

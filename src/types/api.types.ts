@@ -2447,3 +2447,655 @@ export interface FinancialExport {
   expiresAt?: string;
   error?: string;
 }
+
+// ============================================================
+// REPORTING & ANALYTICS TYPES
+// ============================================================
+
+// Report Period Types
+export type ReportPeriod = 'today' | 'yesterday' | 'this_week' | 'last_week' | 'this_month' | 'last_month' | 'this_quarter' | 'last_quarter' | 'this_year' | 'last_year' | 'custom';
+
+export interface DateRangeFilter {
+  startDate: string;
+  endDate: string;
+  period?: ReportPeriod;
+  compareWith?: 'previous_period' | 'previous_year' | 'none';
+}
+
+// Base Report Filters
+export interface ReportFilters extends DateRangeFilter {
+  branchId?: string;
+  branchIds?: string[];
+  categoryId?: string;
+  categoryIds?: string[];
+  productId?: string;
+  productIds?: string[];
+  customerId?: string;
+  customerIds?: string[];
+  staffId?: string;
+  staffIds?: string[];
+  paymentMethod?: PaymentMethod;
+  paymentMethods?: PaymentMethod[];
+}
+
+// Sales Report Types
+export interface SalesSummaryReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  branchId?: string;
+  branch?: Branch;
+  totalSales: number;
+  totalTransactions: number;
+  totalItems: number;
+  totalRefunds: number;
+  totalDiscounts: number;
+  totalTax: number;
+  netSales: number;
+  averageTransaction: number;
+  averageItemsPerTransaction: number;
+  averageItemPrice: number;
+  transactionsByHour?: Array<{hour: number; count: number; amount: number}>;
+  transactionsByDay?: Array<{date: string; count: number; amount: number}>;
+  transactionsByWeek?: Array<{week: string; count: number; amount: number}>;
+  transactionsByMonth?: Array<{month: string; count: number; amount: number}>;
+  comparison?: {
+    previousPeriodSales: number;
+    changeAmount: number;
+    changePercentage: number;
+  };
+  generatedAt: string;
+}
+
+export interface SalesByProductReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  products: Array<{
+    product: Product;
+    quantitySold: number;
+    totalSales: number;
+    totalCost: number;
+    grossProfit: number;
+    profitMargin: number;
+    averagePrice: number;
+    discountAmount: number;
+    refundAmount: number;
+    netSales: number;
+  }>;
+  totalProducts: number;
+  topProducts: Array<{product: Product; sales: number}>;
+  generatedAt: string;
+}
+
+export interface SalesByCategoryReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  categories: Array<{
+    category: Category;
+    quantitySold: number;
+    totalSales: number;
+    totalCost: number;
+    grossProfit: number;
+    profitMargin: number;
+    transactionCount: number;
+    percentage: number;
+  }>;
+  generatedAt: string;
+}
+
+export interface SalesByStaffReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  branchId?: string;
+  staff: Array<{
+    staff: User;
+    transactionCount: number;
+    totalSales: number;
+    totalItems: number;
+    averageTransaction: number;
+    totalDiscounts: number;
+    totalRefunds: number;
+    netSales: number;
+    productsSold: number;
+  }>;
+  generatedAt: string;
+}
+
+export interface SalesByPaymentMethodReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  branchId?: string;
+  paymentMethods: Array<{
+    method: PaymentMethod;
+    transactionCount: number;
+    totalAmount: number;
+    averageAmount: number;
+    percentage: number;
+    refundCount?: number;
+    refundAmount?: number;
+  }>;
+  generatedAt: string;
+}
+
+export interface SalesByBranchReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  branches: Array<{
+    branch: Branch;
+    transactionCount: number;
+    totalSales: number;
+    totalItems: number;
+    averageTransaction: number;
+    topProducts: Array<{product: Product; sales: number}>;
+    staffPerformance: Array<{staff: User; sales: number}>;
+  }>;
+  generatedAt: string;
+}
+
+export interface SalesTrendReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  granularity: 'hourly' | 'daily' | 'weekly' | 'monthly';
+  dataPoints: Array<{
+    date: string;
+    sales: number;
+    transactions: number;
+    averageTransaction: number;
+    items: number;
+  }>;
+  trend: 'up' | 'down' | 'stable';
+  trendPercentage: number;
+  forecast?: Array<{date: string; projected: number; confidence: number}>;
+  generatedAt: string;
+}
+
+// Customer Analytics Types
+export interface CustomerAnalyticsReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  totalCustomers: number;
+  activeCustomers: number;
+  newCustomers: number;
+  returningCustomers: number;
+  churnedCustomers: number;
+  customerRetentionRate: number;
+  customerChurnRate: number;
+  totalPurchases: number;
+  totalRevenue: number;
+  averageCustomerValue: number;
+  averageOrderValue: number;
+  averageOrderFrequency: number;
+  customersByType: Array<{type: 'vip' | 'regular' | 'corporate'; count: number; percentage: number}>;
+  customersByLoyaltyTier: Array<{tier: string; count: number; percentage: number}>;
+  generatedAt: string;
+}
+
+export interface CustomerSegmentationReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  segments: Array<{
+    segment: CustomerSegment;
+    customerCount: number;
+    totalSales: number;
+    averageValue: number;
+    percentage: number;
+  }>;
+  rfmSegmentation?: {
+    champions: number;
+    loyalCustomers: number;
+    potentialLoyalists: number;
+    recentCustomers: number;
+    promising: number;
+    needsAttention: number;
+    aboutToSleep: number;
+    atRisk: number;
+    cantLoseThem: number;
+    hibernating: number;
+    lost: number;
+  };
+  generatedAt: string;
+}
+
+export interface CustomerLifetimeValueReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  customers: Array<{
+    customer: Customer;
+    lifetimeValue: number;
+    totalOrders: number;
+    averageOrderValue: number;
+    firstPurchaseDate: string;
+    lastPurchaseDate: string;
+    daysSinceLastPurchase: number;
+    predictedLifetimeValue?: number;
+    customerLifespan?: number; // in days
+  }>;
+  averageLifetimeValue: number;
+  topCustomers: Array<{customer: Customer; lifetimeValue: number}>;
+  generatedAt: string;
+}
+
+export interface CustomerPurchasePatternsReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  purchaseFrequency: {
+    daily: number;
+    weekly: number;
+    biweekly: number;
+    monthly: number;
+    quarterly: number;
+    yearly: number;
+  };
+  peakPurchaseTimes: Array<{
+    dayOfWeek: string;
+    hour: number;
+    transactionCount: number;
+  }>;
+  popularProducts: Array<{
+    product: Product;
+    purchaseCount: number;
+    customerCount: number;
+  }>;
+  categoryPreferences: Array<{
+    category: Category;
+    customerCount: number;
+    percentage: number;
+  }>;
+  averageBasketSize: number;
+  crossSellOpportunities?: Array<{
+    product1: Product;
+    product2: Product;
+    coOccurrence: number;
+  }>;
+  generatedAt: string;
+}
+
+export interface NewVsReturningCustomersReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  newCustomers: {
+    count: number;
+    totalSales: number;
+    averageOrderValue: number;
+    percentage: number;
+  };
+  returningCustomers: {
+    count: number;
+    totalSales: number;
+    averageOrderValue: number;
+    percentage: number;
+    averageVisits: number;
+  };
+  dataPoints: Array<{
+    date: string;
+    newCustomers: number;
+    returningCustomers: number;
+  }>;
+  generatedAt: string;
+}
+
+// Product Performance Reports
+export interface ProductPerformanceReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  products: Array<{
+    product: Product;
+    quantitySold: number;
+    revenue: number;
+    cost: number;
+    profit: number;
+    profitMargin: number;
+    returnRate: number;
+    stockTurnover: number;
+    daysToSell: number;
+    rating?: number;
+  }>;
+  generatedAt: string;
+}
+
+export interface BestSellersReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  byRevenue: Array<{
+    product: Product;
+    quantitySold: number;
+    revenue: number;
+    profit: number;
+    transactionCount: number;
+  }>;
+  byQuantity: Array<{
+    product: Product;
+    quantitySold: number;
+    revenue: number;
+    profit: number;
+    transactionCount: number;
+  }>;
+  byProfit: Array<{
+    product: Product;
+    quantitySold: number;
+    revenue: number;
+    profit: number;
+    profitMargin: number;
+  }>;
+  trending: Array<{
+    product: Product;
+    currentSales: number;
+    previousSales: number;
+    growthPercentage: number;
+  }>;
+  generatedAt: string;
+}
+
+export interface SlowMovingItemsReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  products: Array<{
+    product: Product;
+    currentStock: number;
+    quantitySold: number;
+    daysInStock: number;
+    estimatedDaysToSellOut: number;
+    stockValue: number;
+    potentialLoss: number;
+    suggestedAction: 'discount' | 'bundle' | 'clearance' | 'return_to_supplier';
+  }>;
+  totalStockValue: number;
+  totalPotentialLoss: number;
+  generatedAt: string;
+}
+
+export interface ProductProfitabilityReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  products: Array<{
+    product: Product;
+    revenue: number;
+    cost: number;
+    grossProfit: number;
+    grossProfitMargin: number;
+    operatingCost?: number;
+    netProfit: number;
+    netProfitMargin: number;
+    roi: number;
+  }>;
+  totalRevenue: number;
+  totalCost: number;
+  totalProfit: number;
+  averageProfitMargin: number;
+  generatedAt: string;
+}
+
+export interface InventoryValuationReport {
+  asOfDate: string;
+  locationId?: string;
+  location?: InventoryLocation;
+  categories: Array<{
+    category: Category;
+    products: Array<{
+      product: Product;
+      quantity: number;
+      unitCost: number;
+      totalCost: number;
+      retailValue: number;
+      potentialProfit: number;
+    }>;
+    totalQuantity: number;
+    totalCost: number;
+    totalRetailValue: number;
+  }>;
+  totalQuantity: number;
+  totalCost: number;
+  totalRetailValue: number;
+  potentialProfit: number;
+  generatedAt: string;
+}
+
+// Financial Analytics Reports
+export interface RevenueReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  branchId?: string;
+  totalRevenue: number;
+  revenueBySource: {
+    sales: number;
+    services: number;
+    other: number;
+  };
+  revenueByCategory: Array<{category: Category; revenue: number; percentage: number}>;
+  revenueByBranch?: Array<{branch: Branch; revenue: number; percentage: number}>;
+  revenueByPaymentMethod: Array<{method: PaymentMethod; revenue: number; percentage: number}>;
+  revenueTrend: Array<{date: string; revenue: number}>;
+  comparison?: {
+    previousPeriodRevenue: number;
+    changeAmount: number;
+    changePercentage: number;
+  };
+  generatedAt: string;
+}
+
+export interface ExpenseReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  branchId?: string;
+  totalExpenses: number;
+  expensesByCategory: Array<{category: ExpenseCategory; amount: number; percentage: number}>;
+  expensesByBranch?: Array<{branch: Branch; amount: number; percentage: number}>;
+  expensesByPaymentMethod: Array<{method: PaymentMethod; amount: number; percentage: number}>;
+  expenseTrend: Array<{date: string; amount: number}>;
+  topExpenses: Array<{expense: Expense; amount: number}>;
+  comparison?: {
+    previousPeriodExpenses: number;
+    changeAmount: number;
+    changePercentage: number;
+  };
+  generatedAt: string;
+}
+
+export interface ProfitMarginAnalysisReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  branchId?: string;
+  totalRevenue: number;
+  totalCost: number;
+  totalExpenses: number;
+  grossProfit: number;
+  grossProfitMargin: number;
+  operatingProfit: number;
+  operatingProfitMargin: number;
+  netProfit: number;
+  netProfitMargin: number;
+  profitByCategory: Array<{
+    category: Category;
+    revenue: number;
+    cost: number;
+    profit: number;
+    margin: number;
+  }>;
+  profitByProduct: Array<{
+    product: Product;
+    revenue: number;
+    cost: number;
+    profit: number;
+    margin: number;
+  }>;
+  profitTrend: Array<{
+    date: string;
+    revenue: number;
+    cost: number;
+    profit: number;
+    margin: number;
+  }>;
+  generatedAt: string;
+}
+
+export interface TaxSummaryReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  branchId?: string;
+  totalTaxCollected: number;
+  totalTaxPaid: number;
+  netTax: number;
+  taxByRate: Array<{
+    rate: number;
+    taxableAmount: number;
+    taxAmount: number;
+    transactionCount: number;
+  }>;
+  taxByCategory: Array<{
+    category: Category;
+    taxableAmount: number;
+    taxAmount: number;
+  }>;
+  taxExemptSales: number;
+  taxTrend: Array<{date: string; taxCollected: number; taxPaid: number}>;
+  generatedAt: string;
+}
+
+export interface CashFlowSummaryReport {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  branchId?: string;
+  openingBalance: number;
+  closingBalance: number;
+  totalInflow: number;
+  totalOutflow: number;
+  netCashFlow: number;
+  inflowBySource: {
+    sales: number;
+    receivables: number;
+    loans: number;
+    investments: number;
+    other: number;
+  };
+  outflowByCategory: {
+    expenses: number;
+    payables: number;
+    payroll: number;
+    inventory: number;
+    other: number;
+  };
+  cashFlowTrend: Array<{
+    date: string;
+    inflow: number;
+    outflow: number;
+    netFlow: number;
+    balance: number;
+  }>;
+  generatedAt: string;
+}
+
+// Report Export Types
+export interface ReportExport {
+  id: string;
+  reportType: 'sales' | 'customer' | 'product' | 'financial';
+  reportName: string;
+  format: 'pdf' | 'excel' | 'csv';
+  filters?: ReportFilters;
+  status: 'generating' | 'completed' | 'failed';
+  fileUrl?: string;
+  fileName?: string;
+  fileSize?: number;
+  emailDelivery?: {
+    recipients: string[];
+    subject: string;
+    message?: string;
+    sent: boolean;
+    sentAt?: string;
+  };
+  generatedBy: string;
+  generatedByUser?: User;
+  generatedAt: string;
+  expiresAt?: string;
+  error?: string;
+}
+
+// Dashboard Metrics Types
+export interface ReportsDashboardMetrics {
+  period: ReportPeriod;
+  startDate: string;
+  endDate: string;
+  sales: {
+    total: number;
+    change: number;
+    changePercentage: number;
+  };
+  revenue: {
+    total: number;
+    change: number;
+    changePercentage: number;
+  };
+  profit: {
+    total: number;
+    margin: number;
+    change: number;
+    changePercentage: number;
+  };
+  customers: {
+    total: number;
+    new: number;
+    returning: number;
+    change: number;
+    changePercentage: number;
+  };
+  products: {
+    bestSeller: Product;
+    topPerforming: Product[];
+    slowMoving: number;
+  };
+  quickStats: {
+    avgTransactionValue: number;
+    avgItemsPerTransaction: number;
+    customerRetentionRate: number;
+    inventoryTurnover: number;
+  };
+  generatedAt: string;
+}
+
+// Chart Data for Visualizations
+export interface SalesChartData {
+  labels: string[];
+  sales: number[];
+  transactions: number[];
+  profit?: number[];
+}
+
+export interface CustomerChartData {
+  labels: string[];
+  newCustomers: number[];
+  returningCustomers: number[];
+  totalCustomers?: number[];
+}
+
+export interface ProductChartData {
+  labels: string[];
+  quantities: number[];
+  revenue: number[];
+  profit?: number[];
+}
+
+export interface FinancialChartData {
+  labels: string[];
+  revenue: number[];
+  expenses: number[];
+  profit: number[];
+}

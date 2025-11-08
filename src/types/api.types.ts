@@ -98,6 +98,26 @@ export enum Permission {
   // Reports
   REPORTS_VIEW = 'reports.view',
   REPORTS_EXPORT = 'reports.export',
+
+  // Financial Management
+  FINANCIAL_VIEW = 'financial.view',
+  FINANCIAL_MANAGE = 'financial.manage',
+  INVOICE_CREATE = 'invoice.create',
+  INVOICE_UPDATE = 'invoice.update',
+  INVOICE_DELETE = 'invoice.delete',
+  INVOICE_SEND = 'invoice.send',
+  PAYMENT_CREATE = 'payment.create',
+  PAYMENT_PROCESS = 'payment.process',
+  PAYMENT_REFUND = 'payment.refund',
+  PAYMENT_RECONCILE = 'payment.reconcile',
+  EXPENSE_CREATE = 'expense.create',
+  EXPENSE_UPDATE = 'expense.update',
+  EXPENSE_DELETE = 'expense.delete',
+  EXPENSE_APPROVE = 'expense.approve',
+  BANK_ACCOUNT_VIEW = 'bank_account.view',
+  BANK_ACCOUNT_MANAGE = 'bank_account.manage',
+  BANK_RECONCILE = 'bank.reconcile',
+  FINANCIAL_REPORTS = 'financial.reports',
 }
 
 export interface User {
@@ -1513,5 +1533,917 @@ export interface OfflinePurchaseOrder {
   status: 'pending' | 'syncing' | 'synced' | 'failed';
   createdAt: string;
   syncedAt?: string;
+  error?: string;
+}
+
+// ============================================================
+// FINANCIAL MANAGEMENT TYPES
+// ============================================================
+
+// Invoice Types
+export enum InvoiceStatus {
+  DRAFT = 'draft',
+  SENT = 'sent',
+  VIEWED = 'viewed',
+  PARTIAL = 'partial',
+  PAID = 'paid',
+  OVERDUE = 'overdue',
+  CANCELLED = 'cancelled',
+  REFUNDED = 'refunded',
+}
+
+export interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  customerId?: string;
+  customer?: Customer;
+  branchId: string;
+  branch?: Branch;
+  type: 'sale' | 'service' | 'rental' | 'subscription' | 'other';
+  status: InvoiceStatus;
+  issueDate: string;
+  dueDate: string;
+  paymentTerms?: PaymentTerms;
+  items: InvoiceItem[];
+  subtotal: number;
+  discountAmount?: number;
+  discountPercentage?: number;
+  taxAmount: number;
+  taxRate?: number;
+  shippingCost?: number;
+  adjustments?: number;
+  total: number;
+  amountPaid: number;
+  amountDue: number;
+  currency: string;
+  templateId?: string;
+  template?: InvoiceTemplate;
+  notes?: string;
+  termsAndConditions?: string;
+  footerText?: string;
+  isRecurring: boolean;
+  recurringSchedule?: RecurringSchedule;
+  parentInvoiceId?: string;
+  payments?: Payment[];
+  emailSent?: boolean;
+  emailSentAt?: string;
+  viewedAt?: string;
+  paidAt?: string;
+  remindersSent?: number;
+  lastReminderAt?: string;
+  attachments?: InvoiceAttachment[];
+  metadata?: Record<string, any>;
+  createdBy: string;
+  createdByUser?: User;
+  updatedBy?: string;
+  updatedByUser?: User;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InvoiceItem {
+  id: string;
+  invoiceId?: string;
+  productId?: string;
+  product?: Product;
+  name: string;
+  description?: string;
+  quantity: number;
+  unitPrice: number;
+  discountAmount?: number;
+  discountPercentage?: number;
+  taxRate?: number;
+  taxAmount?: number;
+  subtotal: number;
+  total: number;
+  sortOrder?: number;
+}
+
+export interface InvoiceTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  layout: 'classic' | 'modern' | 'minimal' | 'professional' | 'custom';
+  primaryColor?: string;
+  accentColor?: string;
+  showLogo: boolean;
+  logoUrl?: string;
+  showBusinessInfo: boolean;
+  showCustomerInfo: boolean;
+  showPaymentTerms: boolean;
+  showNotes: boolean;
+  showSignature: boolean;
+  signatureUrl?: string;
+  headerText?: string;
+  footerText?: string;
+  termsAndConditions?: string;
+  customCss?: string;
+  customFields?: CustomField[];
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CustomField {
+  id: string;
+  label: string;
+  value: string;
+  type: 'text' | 'number' | 'date' | 'url';
+  showOnInvoice: boolean;
+  sortOrder?: number;
+}
+
+export interface InvoiceAttachment {
+  id: string;
+  invoiceId: string;
+  name: string;
+  url: string;
+  fileSize?: number;
+  mimeType?: string;
+  uploadedBy: string;
+  uploadedAt: string;
+}
+
+export interface RecurringSchedule {
+  frequency: 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'yearly';
+  interval?: number; // e.g., every 2 months
+  startDate: string;
+  endDate?: string;
+  occurrences?: number;
+  nextInvoiceDate?: string;
+  lastInvoiceDate?: string;
+  autoSend: boolean;
+  autoCharge?: boolean;
+  isActive: boolean;
+}
+
+// Payment Types
+export enum PaymentStatus {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled',
+  REFUNDED = 'refunded',
+  PARTIALLY_REFUNDED = 'partially_refunded',
+}
+
+export enum PaymentMethod {
+  CASH = 'cash',
+  CARD = 'card',
+  BANK_TRANSFER = 'bank_transfer',
+  MOBILE_PAYMENT = 'mobile_payment',
+  STORE_CREDIT = 'store_credit',
+  CHECK = 'check',
+  DIGITAL_WALLET = 'digital_wallet',
+  OTHER = 'other',
+}
+
+export interface Payment {
+  id: string;
+  paymentNumber: string;
+  type: 'invoice_payment' | 'expense_payment' | 'refund' | 'advance' | 'other';
+  invoiceId?: string;
+  invoice?: Invoice;
+  expenseId?: string;
+  expense?: Expense;
+  customerId?: string;
+  customer?: Customer;
+  supplierId?: string;
+  supplier?: Supplier;
+  branchId: string;
+  branch?: Branch;
+  amount: number;
+  currency: string;
+  method: PaymentMethod;
+  status: PaymentStatus;
+  reference?: string;
+  transactionId?: string;
+  cardType?: 'visa' | 'mastercard' | 'amex' | 'discover' | 'other';
+  last4?: string;
+  approvalCode?: string;
+  checkNumber?: string;
+  bankAccountId?: string;
+  bankAccount?: BankAccount;
+  paymentDate: string;
+  clearedDate?: string;
+  isReconciled: boolean;
+  reconciledAt?: string;
+  reconciledBy?: string;
+  reconciledByUser?: User;
+  signature?: string;
+  attachments?: PaymentAttachment[];
+  notes?: string;
+  metadata?: Record<string, any>;
+  fees?: number;
+  netAmount?: number;
+  refunds?: Refund[];
+  createdBy: string;
+  createdByUser?: User;
+  createdAt: string;
+  updatedAt: string;
+  processedAt?: string;
+}
+
+export interface PaymentAttachment {
+  id: string;
+  paymentId: string;
+  type: 'receipt' | 'proof' | 'authorization' | 'other';
+  name: string;
+  url: string;
+  fileSize?: number;
+  mimeType?: string;
+  uploadedBy: string;
+  uploadedAt: string;
+}
+
+export interface Refund {
+  id: string;
+  refundNumber: string;
+  originalPaymentId: string;
+  originalPayment?: Payment;
+  amount: number;
+  currency: string;
+  reason: string;
+  reasonCategory: 'customer_request' | 'duplicate' | 'error' | 'cancellation' | 'other';
+  method: PaymentMethod;
+  status: PaymentStatus;
+  processedBy: string;
+  processedByUser?: User;
+  processedAt: string;
+  notes?: string;
+  createdAt: string;
+}
+
+// Expense Types
+export enum ExpenseStatus {
+  DRAFT = 'draft',
+  PENDING_APPROVAL = 'pending_approval',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  PAID = 'paid',
+  CANCELLED = 'cancelled',
+}
+
+export interface ExpenseCategory {
+  id: string;
+  name: string;
+  description?: string;
+  parentId?: string;
+  parent?: ExpenseCategory;
+  isTaxDeductible: boolean;
+  requiresApproval: boolean;
+  approvalThreshold?: number;
+  color?: string;
+  icon?: string;
+  isActive: boolean;
+  sortOrder?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Expense {
+  id: string;
+  expenseNumber: string;
+  branchId: string;
+  branch?: Branch;
+  categoryId: string;
+  category?: ExpenseCategory;
+  supplierId?: string;
+  supplier?: Supplier;
+  amount: number;
+  currency: string;
+  taxAmount?: number;
+  taxRate?: number;
+  total: number;
+  expenseDate: string;
+  description: string;
+  notes?: string;
+  status: ExpenseStatus;
+  paymentMethod?: PaymentMethod;
+  paymentId?: string;
+  payment?: Payment;
+  isPaid: boolean;
+  paidAt?: string;
+  isTaxDeductible: boolean;
+  isRecurring: boolean;
+  recurringSchedule?: RecurringSchedule;
+  parentExpenseId?: string;
+  requiresApproval: boolean;
+  approvedBy?: string;
+  approvedByUser?: User;
+  approvedAt?: string;
+  rejectedBy?: string;
+  rejectedByUser?: User;
+  rejectedAt?: string;
+  rejectionReason?: string;
+  bankAccountId?: string;
+  bankAccount?: BankAccount;
+  receipts?: ExpenseReceipt[];
+  tags?: string[];
+  metadata?: Record<string, any>;
+  createdBy: string;
+  createdByUser?: User;
+  updatedBy?: string;
+  updatedByUser?: User;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExpenseReceipt {
+  id: string;
+  expenseId: string;
+  imageUrl: string;
+  thumbnailUrl?: string;
+  fileName: string;
+  fileSize?: number;
+  mimeType?: string;
+  capturedAt?: string;
+  uploadedBy: string;
+  uploadedByUser?: User;
+  uploadedAt: string;
+  ocrData?: OCRData;
+}
+
+export interface OCRData {
+  merchantName?: string;
+  date?: string;
+  total?: number;
+  currency?: string;
+  category?: string;
+  confidence?: number;
+  rawText?: string;
+}
+
+// Bank Account Types
+export interface BankAccount {
+  id: string;
+  accountName: string;
+  accountNumber: string;
+  accountType: 'checking' | 'savings' | 'credit_card' | 'cash' | 'other';
+  bankName?: string;
+  routingNumber?: string;
+  swiftCode?: string;
+  iban?: string;
+  currency: string;
+  currentBalance: number;
+  availableBalance?: number;
+  openingBalance?: number;
+  openingDate?: string;
+  branchId?: string;
+  branch?: Branch;
+  isActive: boolean;
+  isPrimary: boolean;
+  color?: string;
+  icon?: string;
+  lastReconciledDate?: string;
+  lastReconciledBalance?: number;
+  metadata?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Cash Flow Types
+export interface CashFlowEntry {
+  id: string;
+  date: string;
+  branchId: string;
+  branch?: Branch;
+  type: 'inflow' | 'outflow';
+  category: 'sales' | 'expenses' | 'payroll' | 'loan' | 'investment' | 'other';
+  amount: number;
+  currency: string;
+  bankAccountId?: string;
+  bankAccount?: BankAccount;
+  description: string;
+  reference?: string;
+  paymentId?: string;
+  payment?: Payment;
+  invoiceId?: string;
+  invoice?: Invoice;
+  expenseId?: string;
+  expense?: Expense;
+  isReconciled: boolean;
+  reconciledAt?: string;
+  createdAt: string;
+}
+
+export interface CashFlowForecast {
+  id: string;
+  startDate: string;
+  endDate: string;
+  branchId?: string;
+  branch?: Branch;
+  projections: CashFlowProjection[];
+  assumptions?: string;
+  createdBy: string;
+  createdByUser?: User;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CashFlowProjection {
+  date: string;
+  projectedInflow: number;
+  projectedOutflow: number;
+  projectedBalance: number;
+  actualInflow?: number;
+  actualOutflow?: number;
+  actualBalance?: number;
+  variance?: number;
+}
+
+// Bank Reconciliation Types
+export interface BankReconciliation {
+  id: string;
+  reconciliationNumber: string;
+  bankAccountId: string;
+  bankAccount?: BankAccount;
+  startDate: string;
+  endDate: string;
+  openingBalance: number;
+  closingBalance: number;
+  statementBalance: number;
+  reconciledBalance: number;
+  difference: number;
+  status: 'in_progress' | 'completed' | 'needs_review';
+  transactions: ReconciliationTransaction[];
+  unmatchedBankTransactions?: BankTransaction[];
+  unmatchedSystemTransactions?: CashFlowEntry[];
+  adjustments?: ReconciliationAdjustment[];
+  performedBy: string;
+  performedByUser?: User;
+  reviewedBy?: string;
+  reviewedByUser?: User;
+  startedAt: string;
+  completedAt?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReconciliationTransaction {
+  id: string;
+  reconciliationId: string;
+  bankTransactionId?: string;
+  systemTransactionId?: string;
+  date: string;
+  description: string;
+  amount: number;
+  type: 'matched' | 'bank_only' | 'system_only' | 'adjusted';
+  isReconciled: boolean;
+  notes?: string;
+}
+
+export interface BankTransaction {
+  id: string;
+  bankAccountId: string;
+  transactionDate: string;
+  description: string;
+  amount: number;
+  type: 'debit' | 'credit';
+  balance?: number;
+  reference?: string;
+  category?: string;
+  isReconciled: boolean;
+  matchedTransactionId?: string;
+  importedFrom?: string;
+  importedAt?: string;
+  createdAt: string;
+}
+
+export interface ReconciliationAdjustment {
+  id: string;
+  reconciliationId: string;
+  type: 'bank_charge' | 'interest' | 'error_correction' | 'other';
+  amount: number;
+  description: string;
+  createdBy: string;
+  createdAt: string;
+}
+
+// Financial Report Types
+export interface FinancialReport {
+  id: string;
+  type: 'profit_loss' | 'balance_sheet' | 'cash_flow' | 'income_statement' | 'tax_report' | 'eod_reconciliation';
+  title: string;
+  startDate: string;
+  endDate: string;
+  branchId?: string;
+  branch?: Branch;
+  currency: string;
+  status: 'generating' | 'completed' | 'failed';
+  format?: 'pdf' | 'excel' | 'csv' | 'json';
+  fileUrl?: string;
+  data?: any;
+  generatedBy: string;
+  generatedByUser?: User;
+  generatedAt: string;
+  expiresAt?: string;
+  metadata?: Record<string, any>;
+}
+
+// Profit & Loss Statement
+export interface ProfitLossStatement {
+  startDate: string;
+  endDate: string;
+  branchId?: string;
+  branch?: Branch;
+  currency: string;
+  revenue: RevenueBreakdown;
+  costOfGoodsSold: number;
+  grossProfit: number;
+  grossProfitMargin: number;
+  operatingExpenses: ExpenseBreakdown;
+  totalOperatingExpenses: number;
+  operatingIncome: number;
+  operatingIncomeMargin: number;
+  otherIncome: number;
+  otherExpenses: number;
+  netIncome: number;
+  netProfitMargin: number;
+  taxes?: number;
+  netIncomeAfterTax?: number;
+  generatedAt: string;
+}
+
+export interface RevenueBreakdown {
+  sales: number;
+  services: number;
+  other: number;
+  total: number;
+  byCategory?: Record<string, number>;
+  byProduct?: Array<{productId: string; name: string; amount: number}>;
+}
+
+export interface ExpenseBreakdown {
+  salaries: number;
+  rent: number;
+  utilities: number;
+  marketing: number;
+  supplies: number;
+  maintenance: number;
+  insurance: number;
+  depreciation: number;
+  other: number;
+  total: number;
+  byCategory?: Record<string, number>;
+}
+
+// Balance Sheet
+export interface BalanceSheet {
+  asOfDate: string;
+  branchId?: string;
+  branch?: Branch;
+  currency: string;
+  assets: Assets;
+  liabilities: Liabilities;
+  equity: Equity;
+  totalAssets: number;
+  totalLiabilities: number;
+  totalEquity: number;
+  generatedAt: string;
+}
+
+export interface Assets {
+  currentAssets: CurrentAssets;
+  fixedAssets: FixedAssets;
+  otherAssets: number;
+  total: number;
+}
+
+export interface CurrentAssets {
+  cash: number;
+  bankAccounts: number;
+  accountsReceivable: number;
+  inventory: number;
+  prepaidExpenses: number;
+  other: number;
+  total: number;
+}
+
+export interface FixedAssets {
+  property: number;
+  equipment: number;
+  vehicles: number;
+  accumulatedDepreciation: number;
+  total: number;
+}
+
+export interface Liabilities {
+  currentLiabilities: CurrentLiabilities;
+  longTermLiabilities: LongTermLiabilities;
+  total: number;
+}
+
+export interface CurrentLiabilities {
+  accountsPayable: number;
+  taxesPayable: number;
+  salariesPayable: number;
+  shortTermLoans: number;
+  other: number;
+  total: number;
+}
+
+export interface LongTermLiabilities {
+  loans: number;
+  mortgages: number;
+  other: number;
+  total: number;
+}
+
+export interface Equity {
+  ownersEquity: number;
+  retainedEarnings: number;
+  currentYearEarnings: number;
+  total: number;
+}
+
+// Cash Flow Report
+export interface CashFlowReport {
+  startDate: string;
+  endDate: string;
+  branchId?: string;
+  branch?: Branch;
+  currency: string;
+  openingBalance: number;
+  operatingActivities: CashFlowActivities;
+  investingActivities: CashFlowActivities;
+  financingActivities: CashFlowActivities;
+  netCashFlow: number;
+  closingBalance: number;
+  generatedAt: string;
+}
+
+export interface CashFlowActivities {
+  inflows: Array<{description: string; amount: number}>;
+  outflows: Array<{description: string; amount: number}>;
+  totalInflows: number;
+  totalOutflows: number;
+  netCashFlow: number;
+}
+
+// Tax Report
+export interface TaxReport {
+  startDate: string;
+  endDate: string;
+  branchId?: string;
+  branch?: Branch;
+  currency: string;
+  taxType: 'sales_tax' | 'income_tax' | 'vat' | 'gst' | 'other';
+  taxableIncome: number;
+  taxExemptIncome: number;
+  totalTaxCollected: number;
+  totalTaxPaid: number;
+  taxableExpenses: number;
+  nonTaxableExpenses: number;
+  taxOwed: number;
+  taxRefund: number;
+  details: TaxReportDetail[];
+  generatedAt: string;
+}
+
+export interface TaxReportDetail {
+  date: string;
+  description: string;
+  taxableAmount: number;
+  taxRate: number;
+  taxAmount: number;
+  reference?: string;
+}
+
+// End of Day Reconciliation
+export interface EODReconciliation {
+  id: string;
+  reconciliationNumber: string;
+  date: string;
+  branchId: string;
+  branch?: Branch;
+  openingCash: number;
+  closingCash: number;
+  expectedCash: number;
+  actualCash: number;
+  variance: number;
+  sales: EODSales;
+  payments: EODPayments;
+  expenses: EODExpenses;
+  cashMovements: EODCashMovement[];
+  status: 'in_progress' | 'completed' | 'needs_review';
+  performedBy: string;
+  performedByUser?: User;
+  reviewedBy?: string;
+  reviewedByUser?: User;
+  notes?: string;
+  signature?: string;
+  completedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EODSales {
+  totalTransactions: number;
+  totalSales: number;
+  totalRefunds: number;
+  netSales: number;
+  byPaymentMethod: Record<PaymentMethod, number>;
+  averageTransaction: number;
+}
+
+export interface EODPayments {
+  cash: number;
+  card: number;
+  bankTransfer: number;
+  mobilePayment: number;
+  storeCredit: number;
+  other: number;
+  total: number;
+}
+
+export interface EODExpenses {
+  total: number;
+  byCategory: Record<string, number>;
+  count: number;
+}
+
+export interface EODCashMovement {
+  id: string;
+  type: 'cash_in' | 'cash_out' | 'bank_deposit' | 'petty_cash';
+  amount: number;
+  reason: string;
+  performedBy: string;
+  time: string;
+  reference?: string;
+  notes?: string;
+}
+
+// Financial Dashboard
+export interface FinancialDashboard {
+  branchId?: string;
+  period: 'today' | 'week' | 'month' | 'quarter' | 'year';
+  startDate: string;
+  endDate: string;
+  currency: string;
+  summary: FinancialSummary;
+  revenue: RevenueTrend[];
+  expenses: ExpenseTrend[];
+  profitability: ProfitabilityMetrics;
+  cashFlow: CashFlowSummary;
+  receivables: ReceivablesSummary;
+  payables: PayablesSummary;
+  topExpenseCategories: Array<{category: string; amount: number; percentage: number}>;
+  recentInvoices: Invoice[];
+  recentPayments: Payment[];
+  recentExpenses: Expense[];
+  alerts: FinancialAlert[];
+  generatedAt: string;
+}
+
+export interface FinancialSummary {
+  totalRevenue: number;
+  totalExpenses: number;
+  netProfit: number;
+  profitMargin: number;
+  totalInvoiced: number;
+  totalReceived: number;
+  totalOutstanding: number;
+  cashOnHand: number;
+  bankBalance: number;
+}
+
+export interface RevenueTrend {
+  date: string;
+  amount: number;
+  transactions?: number;
+}
+
+export interface ExpenseTrend {
+  date: string;
+  amount: number;
+  count?: number;
+}
+
+export interface ProfitabilityMetrics {
+  grossProfitMargin: number;
+  netProfitMargin: number;
+  returnOnInvestment?: number;
+  breakEvenPoint?: number;
+}
+
+export interface CashFlowSummary {
+  inflow: number;
+  outflow: number;
+  netCashFlow: number;
+  projectedEndBalance: number;
+  daysOfCashRemaining?: number;
+}
+
+export interface ReceivablesSummary {
+  total: number;
+  current: number;
+  overdue: number;
+  over30Days: number;
+  over60Days: number;
+  over90Days: number;
+  averageDaysToPayment: number;
+}
+
+export interface PayablesSummary {
+  total: number;
+  current: number;
+  overdue: number;
+  dueThisWeek: number;
+  dueThisMonth: number;
+}
+
+export interface FinancialAlert {
+  id: string;
+  type: 'warning' | 'error' | 'info';
+  category: 'invoice' | 'payment' | 'expense' | 'cash_flow' | 'reconciliation';
+  message: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  actionRequired?: string;
+  createdAt: string;
+}
+
+// Financial Filters & Search
+export interface FinancialFilters extends PaginationParams {
+  branchId?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+  customerId?: string;
+  supplierId?: string;
+  categoryId?: string;
+  paymentMethod?: PaymentMethod;
+  minAmount?: number;
+  maxAmount?: number;
+  searchTerm?: string;
+  isReconciled?: boolean;
+  isTaxDeductible?: boolean;
+  tags?: string[];
+}
+
+// Payment Method Configuration
+export interface PaymentMethodConfig {
+  id: string;
+  method: PaymentMethod;
+  name: string;
+  isEnabled: boolean;
+  isDefault: boolean;
+  requiresAuth: boolean;
+  allowRefunds: boolean;
+  processingFeePercentage?: number;
+  processingFeeFixed?: number;
+  accountId?: string;
+  apiKey?: string;
+  merchantId?: string;
+  terminalId?: string;
+  settings?: Record<string, any>;
+  sortOrder?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Signature Capture
+export interface SignatureCapture {
+  id: string;
+  type: 'payment' | 'invoice' | 'expense' | 'reconciliation' | 'receipt';
+  referenceId: string;
+  signatureData: string; // Base64 image data
+  signedBy: string;
+  signedByName?: string;
+  signedAt: string;
+  ipAddress?: string;
+  deviceInfo?: string;
+}
+
+// Chart Data Types (for dashboard visualizations)
+export interface ChartData {
+  labels: string[];
+  datasets: ChartDataset[];
+}
+
+export interface ChartDataset {
+  label: string;
+  data: number[];
+  backgroundColor?: string | string[];
+  borderColor?: string | string[];
+  borderWidth?: number;
+}
+
+// Financial Export Types
+export interface FinancialExport {
+  id: string;
+  type: 'invoices' | 'payments' | 'expenses' | 'reports';
+  format: 'pdf' | 'excel' | 'csv';
+  filters?: FinancialFilters;
+  status: 'generating' | 'completed' | 'failed';
+  fileUrl?: string;
+  fileName?: string;
+  fileSize?: number;
+  generatedBy: string;
+  generatedByUser?: User;
+  generatedAt: string;
+  expiresAt?: string;
   error?: string;
 }

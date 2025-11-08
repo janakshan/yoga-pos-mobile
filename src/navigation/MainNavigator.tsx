@@ -7,6 +7,7 @@ import {ProductsNavigator} from './ProductsNavigator';
 import {InventoryNavigator} from './InventoryNavigator';
 import {CustomersNavigator} from './CustomersNavigator';
 import {ProcurementNavigator} from './ProcurementNavigator';
+import {FinancialNavigator} from './FinancialNavigator';
 import {Theme} from '@constants/theme';
 import {Text} from 'react-native';
 
@@ -93,6 +94,22 @@ export const MainNavigator = () => {
         component={ProcurementNavigator}
         options={{
           tabBarLabel: 'Procurement',
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
+        name="Financial"
+        component={FinancialNavigator}
+        options={{
+          tabBarLabel: 'Financial',
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
+        name="More"
+        component={MoreScreen}
+        options={{
+          tabBarLabel: 'More',
           headerShown: false,
         }}
       />

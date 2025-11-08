@@ -28,6 +28,7 @@ export type MainTabParamList = {
   Products: NavigatorScreenParams<ProductsStackParamList>;
   Customers: NavigatorScreenParams<CustomersStackParamList>;
   Procurement: NavigatorScreenParams<ProcurementStackParamList>;
+  Financial: NavigatorScreenParams<FinancialStackParamList>;
   More: NavigatorScreenParams<MoreStackParamList>;
 };
 
@@ -99,6 +100,73 @@ export type ProcurementStackParamList = {
   PurchaseOrderForm: {mode: 'create' | 'edit'; purchaseOrderId?: string};
   POApproval: undefined;
   Receiving: {purchaseOrderId: string; locationId: string};
+};
+
+// Financial Stack Navigator
+export type FinancialStackParamList = {
+  // Dashboard
+  FinancialDashboard: undefined;
+
+  // Invoices
+  InvoiceList: undefined;
+  InvoiceDetails: {invoiceId: string};
+  InvoiceForm: {mode: 'create' | 'edit'; invoiceId?: string};
+  InvoicePreview: {invoiceId: string};
+  InvoiceTemplates: undefined;
+  InvoiceTemplateForm: {mode: 'create' | 'edit'; templateId?: string};
+
+  // Payments
+  PaymentList: undefined;
+  PaymentDetails: {paymentId: string};
+  PaymentForm: {mode: 'create' | 'record'; invoiceId?: string; paymentId?: string};
+  PaymentHistory: {customerId?: string; invoiceId?: string};
+  RefundForm: {paymentId: string};
+  PaymentReconciliation: undefined;
+
+  // Expenses
+  ExpenseList: undefined;
+  ExpenseDetails: {expenseId: string};
+  ExpenseForm: {mode: 'create' | 'edit'; expenseId?: string};
+  ExpenseApprovals: undefined;
+  ExpenseCameraCapture: {expenseId?: string; onCapture: (uri: string) => void};
+  ExpenseCategories: undefined;
+
+  // Bank Accounts
+  BankAccountList: undefined;
+  BankAccountDetails: {accountId: string};
+  BankAccountForm: {mode: 'create' | 'edit'; accountId?: string};
+
+  // Bank Reconciliation
+  ReconciliationList: {bankAccountId?: string};
+  ReconciliationDetails: {reconciliationId: string};
+  ReconciliationStart: {bankAccountId: string};
+  ReconciliationPerform: {reconciliationId: string};
+
+  // Cash Flow
+  CashFlowOverview: undefined;
+  CashFlowForecastList: undefined;
+  CashFlowForecastDetails: {forecastId: string};
+  CashFlowForecastForm: {mode: 'create' | 'edit'; forecastId?: string};
+
+  // Reports
+  FinancialReports: undefined;
+  ProfitLossReport: {startDate?: string; endDate?: string};
+  BalanceSheetReport: {asOfDate?: string};
+  CashFlowReport: {startDate?: string; endDate?: string};
+  TaxReport: {startDate?: string; endDate?: string; taxType?: string};
+  ReportPreview: {reportId: string};
+
+  // EOD Reconciliation
+  EODReconciliationList: undefined;
+  EODReconciliationDetails: {reconciliationId: string};
+  EODReconciliationPerform: {date?: string};
+
+  // Signature Capture
+  SignatureCapture: {
+    type: 'payment' | 'invoice' | 'expense' | 'reconciliation' | 'receipt';
+    referenceId: string;
+    onSave: (signatureData: string) => void;
+  };
 };
 
 // More Stack Navigator

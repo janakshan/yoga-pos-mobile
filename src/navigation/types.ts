@@ -29,6 +29,7 @@ export type MainTabParamList = {
   Customers: NavigatorScreenParams<CustomersStackParamList>;
   Procurement: NavigatorScreenParams<ProcurementStackParamList>;
   Financial: NavigatorScreenParams<FinancialStackParamList>;
+  Reports: NavigatorScreenParams<ReportsStackParamList>;
   More: NavigatorScreenParams<MoreStackParamList>;
 };
 
@@ -169,12 +170,63 @@ export type FinancialStackParamList = {
   };
 };
 
+// Reports Stack Navigator
+export type ReportsStackParamList = {
+  // Dashboard
+  ReportsDashboard: undefined;
+
+  // Sales Reports
+  SalesReports: {period?: string; startDate?: string; endDate?: string};
+  SalesSummary: {period?: string; startDate?: string; endDate?: string};
+  SalesByProduct: {period?: string; startDate?: string; endDate?: string};
+  SalesByCategory: {period?: string; startDate?: string; endDate?: string};
+  SalesByStaff: {period?: string; startDate?: string; endDate?: string};
+  SalesByPaymentMethod: {period?: string; startDate?: string; endDate?: string};
+  SalesByBranch: {period?: string; startDate?: string; endDate?: string};
+  SalesTrends: {period?: string; startDate?: string; endDate?: string};
+
+  // Customer Reports
+  CustomerReports: {period?: string; startDate?: string; endDate?: string};
+  CustomerAnalytics: {period?: string; startDate?: string; endDate?: string};
+  CustomerSegmentation: {period?: string; startDate?: string; endDate?: string};
+  CustomerLifetimeValue: {period?: string; startDate?: string; endDate?: string};
+  CustomerPurchasePatterns: {period?: string; startDate?: string; endDate?: string};
+  NewVsReturningCustomers: {period?: string; startDate?: string; endDate?: string};
+
+  // Product Reports
+  ProductReports: {period?: string; startDate?: string; endDate?: string};
+  ProductPerformance: {period?: string; startDate?: string; endDate?: string};
+  BestSellers: {period?: string; startDate?: string; endDate?: string};
+  SlowMovingItems: {period?: string; startDate?: string; endDate?: string};
+  ProductProfitability: {period?: string; startDate?: string; endDate?: string};
+  InventoryValuation: {asOfDate?: string};
+
+  // Financial Reports
+  FinancialReportsOverview: {period?: string; startDate?: string; endDate?: string};
+  RevenueReport: {period?: string; startDate?: string; endDate?: string};
+  ExpenseAnalysis: {period?: string; startDate?: string; endDate?: string};
+  ProfitMarginReport: {period?: string; startDate?: string; endDate?: string};
+  TaxSummaryReport: {period?: string; startDate?: string; endDate?: string};
+  CashFlowSummaryReport: {period?: string; startDate?: string; endDate?: string};
+
+  // Export & Share
+  ReportExport: {
+    reportType: 'sales' | 'customer' | 'product' | 'financial';
+    reportName: string;
+    filters?: any;
+  };
+  ReportShare: {
+    reportType: 'sales' | 'customer' | 'product' | 'financial';
+    reportName: string;
+    filters?: any;
+  };
+};
+
 // More Stack Navigator
 export type MoreStackParamList = {
   MoreMenu: undefined;
   Profile: undefined;
   Settings: undefined;
-  Reports: undefined;
   Help: undefined;
   About: undefined;
 };

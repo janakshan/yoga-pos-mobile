@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {StatusBar} from 'react-native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {RootNavigator} from '@navigation/RootNavigator';
 import {ThemeProvider} from '@context/ThemeContext';
+import AuditService from '@services/AuditService';
 
 /**
  * Main App Component
@@ -22,6 +23,20 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
+  // Initialize Audit Service on app startup
+  useEffect(() => {
+    const initializeAuditService = async () => {
+      try {
+        await AuditService.initialize();
+        console.log('[App] Audit Service initialized successfully');
+      } catch (error) {
+        console.error('[App] Failed to initialize Audit Service:', error);
+      }
+    };
+
+    initializeAuditService();
+  }, []);
+
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <ThemeProvider>

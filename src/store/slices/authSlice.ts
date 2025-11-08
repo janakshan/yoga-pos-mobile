@@ -13,6 +13,8 @@ import {TokenService} from '@services/TokenService';
 import {JWTUtility} from '@utils/jwt.utils';
 import {BiometricUtility} from '@utils/biometric.utils';
 import {RBACUtility} from '@utils/rbac.utils';
+import AuditService from '@services/AuditService';
+import {AuditEventType, AuditStatus} from '../../types/audit.types';
 
 /**
  * Authentication Store
@@ -96,9 +98,35 @@ export const useAuthStore = create<AuthStore>()(
           state.biometricEnabled = response.user.biometricEnabled || false;
         });
 
+        // Log successful login
+        AuditService.setContext({
+          userId: response.user.id,
+          sessionId: session.token,
+        });
+        await AuditService.logAuth(
+          AuditEventType.AUTH_LOGIN,
+          response.user.id,
+          AuditStatus.SUCCESS,
+          {
+            username: credentials.username,
+            rememberMe: credentials.rememberMe,
+          },
+        );
+
         // Check biometric availability
         await get().checkBiometricAvailability();
       } catch (error: any) {
+        // Log failed login
+        await AuditService.logAuth(
+          AuditEventType.AUTH_LOGIN_FAILED,
+          credentials.username,
+          AuditStatus.FAILURE,
+          {
+            username: credentials.username,
+            errorMessage: error.message,
+          },
+        );
+
         set(state => {
           state.error = error.message || 'Login failed';
           state.isLoading = false;
@@ -139,7 +167,34 @@ export const useAuthStore = create<AuthStore>()(
           state.pinEnabled = response.user.pinEnabled || false;
           state.biometricEnabled = response.user.biometricEnabled || false;
         });
+
+        // Log successful PIN login
+        AuditService.setContext({
+          userId: response.user.id,
+          sessionId: session.token,
+        });
+        await AuditService.logAuth(
+          AuditEventType.AUTH_LOGIN,
+          response.user.id,
+          AuditStatus.SUCCESS,
+          {
+            username: credentials.username,
+            authMethod: 'pin',
+          },
+        );
       } catch (error: any) {
+        // Log failed PIN login
+        await AuditService.logAuth(
+          AuditEventType.AUTH_LOGIN_FAILED,
+          credentials.username,
+          AuditStatus.FAILURE,
+          {
+            username: credentials.username,
+            authMethod: 'pin',
+            errorMessage: error.message,
+          },
+        );
+
         set(state => {
           state.error = error.message || 'PIN login failed';
           state.isLoading = false;
@@ -196,7 +251,32 @@ export const useAuthStore = create<AuthStore>()(
           state.isLoading = false;
           state.session = session;
         });
+
+        // Log successful biometric login
+        AuditService.setContext({
+          userId: response.user.id,
+          sessionId: session.token,
+        });
+        await AuditService.logAuth(
+          AuditEventType.AUTH_BIOMETRIC,
+          response.user.id,
+          AuditStatus.SUCCESS,
+          {
+            authMethod: 'biometric',
+          },
+        );
       } catch (error: any) {
+        // Log failed biometric login
+        await AuditService.logAuth(
+          AuditEventType.AUTH_LOGIN_FAILED,
+          'unknown',
+          AuditStatus.FAILURE,
+          {
+            authMethod: 'biometric',
+            errorMessage: error.message,
+          },
+        );
+
         set(state => {
           state.error = error.message || 'Biometric login failed';
           state.isLoading = false;
@@ -206,10 +286,20 @@ export const useAuthStore = create<AuthStore>()(
     },
 
     logout: async () => {
+      const {user} = get();
       try {
         set(state => {
           state.isLoading = true;
         });
+
+        // Log logout
+        if (user) {
+          await AuditService.logAuth(
+            AuditEventType.AUTH_LOGOUT,
+            user.id,
+            AuditStatus.SUCCESS,
+          );
+        }
 
         // Call logout API
         await authService.logout();
@@ -217,6 +307,9 @@ export const useAuthStore = create<AuthStore>()(
         // Continue with logout even if API call fails
         console.error('Logout API error:', error);
       } finally {
+        // Clear audit context
+        AuditService.clearContext();
+
         // Clear tokens and user data
         await TokenService.clearTokens();
 
@@ -409,6 +502,13 @@ export const useAuthStore = create<AuthStore>()(
           }
         });
 
+        // Log PIN setup
+        await AuditService.logUserEvent(
+          AuditEventType.USER_PIN_SET,
+          user.id,
+          user.name || user.username,
+        );
+
         // Save updated user
         const updatedUser = get().user;
         if (updatedUser) {
@@ -435,6 +535,13 @@ export const useAuthStore = create<AuthStore>()(
             state.user.pinEnabled = false;
           }
         });
+
+        // Log PIN disable
+        await AuditService.logUserEvent(
+          AuditEventType.USER_PIN_DISABLE,
+          user.id,
+          user.name || user.username,
+        );
 
         // Save updated user
         const updatedUser = get().user;
